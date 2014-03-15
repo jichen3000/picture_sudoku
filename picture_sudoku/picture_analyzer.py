@@ -4,7 +4,12 @@ import cv2
 
 BLACK = 0
 WHITE = 255
-
+'''
+    notice, the point in the pic_arr, like [478, 128], 
+    the first one is the column number, 
+    the second one is the row number.
+    Don't get them reversely.
+'''
 def find_sudoku_number_binary_arr(pic_arr):
     '''
         Find all numbers from a picture in which there is a soduku puzzle.
@@ -79,9 +84,9 @@ def cal_squre_area_indexs(contour):
 def cal_split_ragion_indexs_arr(start_row_index, end_row_index, start_col_index, end_col_index, 
     split_num=9, modified_percent=0.15):
     '''
-        firstlt row, then col
+        firstly row, then col
     '''
-    step = int((end_row_index - start_row_index) / 9)
+    step = int((end_row_index - start_row_index) / split_num)
     modifer = int(step*modified_percent)
     # return [(i,j) for i in range(split_num) for j in range(split_num)]
     result = [(start_row_index+i*step+modifer, start_row_index+(i+1)*step-modifer, 
@@ -90,13 +95,23 @@ def cal_split_ragion_indexs_arr(start_row_index, end_row_index, start_col_index,
     return result
 
 
-def transfer_values(arr, rule_hash):
+def transfer_values(arr, rule_hash, is_reverse=False):
     '''
         rule_hash = {0:1, 255:0}
     '''
-    for source, target in rule_hash.items():
-        arr[arr==source] = target
+    if not is_reverse:
+        for source, target in rule_hash.items():
+            arr[arr==source] = target
+    else:
+        for target, source in rule_hash.items():
+            arr[arr==source] = target
     return arr
+
+def clip_array_by_fixed_size(pic_array, fixed_height=32, fixed_width=32, delta_start_y=3):
+    height, width = pic_array.shape
+    start_y = int((height - fixed_height)/2)-delta_start_y
+    start_x = int((width - fixed_width)/2)
+    return pic_array[start_y:start_y+fixed_height, start_x:start_x+fixed_width]
 
 
 if __name__ == '__main__':
@@ -218,7 +233,7 @@ if __name__ == '__main__':
         # show_pic(one_number_pic)
         # one_number_pic.pp()
         # transfer_values(one_number_pic, {WHITE:0, BLACK:1})
-        # numpy.savetxt("test5.txt",one_number_pic,fmt="%3d")
+        # numpy.savetxt("test5.dataset",one_number_pic,fmt="%3d")
 
     with test("find_sudoku_number_binary_arr"):
         number_binary_arr = find_sudoku_number_binary_arr(gray_arr)
@@ -228,4 +243,5 @@ if __name__ == '__main__':
         row_count, col_count = number_5.shape
         (row_count*col_count).must_equal(black_count+white_count)
         black_count.must_equal(91)
-        # numpy.savetxt("test5.txt",number_5,fmt="%3d")
+        # number_5 = clip_array_by_fixed_size(number_5,delta_start_y=-5)
+        numpy.savetxt("test5.dataset",number_5,fmt="%d", delimiter='')

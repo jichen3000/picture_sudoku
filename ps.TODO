@@ -1,4 +1,9 @@
  ☐ get number from binary text file.
- ☐ transfer a number pic file to binary text file.
- ☐ split number pics from a whole sudoku pic file.
- ☐ get the whole sudoku pic file from a normal pic file.
+ ✔ transfer a number pic file to binary text file. @done (14-03-10 14:32)
+ ✔ split number pics from a whole sudoku pic file. @done (14-03-10 14:32)
+ ✔ get the whole sudoku pic file from a normal pic file. @done (14-03-10 14:32)
+ ✔ remove margin from binary text file. @done (14-03-11 10:54)
+ ✔ test font number error with svm. @done (14-03-15 15:53)
+ ✔ refactor svm implementation. @done (14-03-15 15:53)
+
+
