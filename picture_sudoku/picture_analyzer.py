@@ -1,52 +1,83 @@
 import numpy
 import cv2
 
+import cv2_helper
 
-BLACK = 0
-WHITE = 255
+
+BLACK = cv2_helper.BLACK
+WHITE = cv2_helper.WHITE
+
+IMG_SIZE = 32
 '''
     notice, the point in the pic_arr, like [478, 128], 
     the first one is the column number, 
     the second one is the row number.
     Don't get them reversely.
 '''
-def find_sudoku_number_binary_arr(pic_arr):
+def find_sudoku_number_binary_arr(gray_pic_arr):
     '''
         Find all numbers from a picture in which there is a soduku puzzle.
         The number form is a binary numpy.array in which number parts are 1, 
         the others are 0.
     '''
-    threshold_value = int(pic_arr.mean()*0.7)
-    not_use,threshed_arr = cv2.threshold(pic_arr,threshold_value,WHITE,1)
+    '''
+        notice: the threshold_value is the key, if it directly impact the binary matrix.
+    '''
+    threshed_pic_array = cv2_helper.threshold_white_with_mean_percent(gray_pic_arr)
     # not_use.pp()
 
-    square = find_max_square(threshed_arr)
+    square = find_max_square(threshed_pic_array)
 
-    indexs = cal_squre_area_indexs(square)
-    ragion_indexs_arr = cal_split_ragion_indexs_arr(*indexs)
+    number_rects = cv2_helper.cal_split_ragion_rects(square, 9, 9)
+    # cv2_helper.show_rects_in_pic(gray_pic_arr, number_rects)
 
-    binary_arr = transfer_values(threshed_arr, {BLACK:0, WHITE:1})
 
-    number_binary_arr = splite_arr_by_ragion_indexs_arr(binary_arr, ragion_indexs_arr)
-    return number_binary_arr
+    binary_pic = transfer_values(threshed_pic_array, {BLACK:0, WHITE:1})
+    number_binary_ragions = map(lambda c: cv2_helper.get_rect_ragion_with_rect(binary_pic, c),
+        number_rects)
+
+    number_binary_ragions = map(remove_border, number_binary_ragions)
+
+    non_empty_indexs, number_binary_ragions = get_nonzero_ragions_and_indexs(number_binary_ragions)
+    # indexs.pp()
+
+    # cv2_helper.show_same_size_ragions_as_pic(number_binary_ragions, 9)
+
+    number_binary_ragions = map(remove_margin, number_binary_ragions)
+
+    number_binary_ragions = map(enlarge, number_binary_ragions)
+    # show_pic(threshed_pic_array)
+    # cv2_helper.show_same_size_ragions_as_pic(number_binary_ragions, 9)
+
+    return number_binary_ragions
+
+def remove_border(pic_array):
+    return cv2_helper.clip_array_by_percent(pic_array, percent=0.15)
+
+def get_nonzero_ragions_and_indexs(ragions):
+    index_ragion_list = [(i, ragion) for i, ragion in enumerate(ragions) 
+            if cv2_helper.is_not_empty_pic(ragion)]
+    return zip(*index_ragion_list)
+
+
+
+def remove_margin(pic_array):
+    new_rect = cv2_helper.cal_nonzero_rect_as_pic_ratio(pic_array)
+    return cv2_helper.get_rect_ragion_with_rect(pic_array, new_rect)
+    
+def enlarge(pic_array):
+    return cv2.resize(pic_array, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_CUBIC);
+
+
+
 
 def splite_arr_by_ragion_indexs_arr(arr, ragion_indexs_arr):
     return [arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]] 
         for cur_indexs in ragion_indexs_arr]
 
 
-def find_max_square(threshed_arr):
-    '''
-        notice: the threshold_value is the key, if it directly impact the binary matrix.
-    '''
-    contours,not_use = cv2.findContours(threshed_arr.copy(),cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
-
-    def get_approximated_contour(contour):
-        perimeter = cv2.arcLength(contour,True)
-        return cv2.approxPolyDP(contour,0.01*perimeter,True)
-
-    contours = map(get_approximated_contour, contours)
-    squares = filter(is_almost_square, contours)
+def find_max_square(threshed_pic_array):
+    squares = cv2_helper.find_contours(threshed_pic_array, is_almost_square)
     square_perimeter_arr = [cv2.arcLength(i,True) for i in squares]
     return squares[square_perimeter_arr.index(max(square_perimeter_arr))]
 
@@ -179,8 +210,7 @@ if __name__ == '__main__':
             gray_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]], numpy.allclose)
 
     with test("find_max_square"):
-        threshold_value = int(gray_arr.mean()*0.7)
-        not_use,current_pic_arr = cv2.threshold(gray_arr,threshold_value,WHITE,1)
+        current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_arr)
         max_square = find_max_square(current_pic_arr)
         max_square.must_equal(numpy.array([[[ 671,  421]],
                                [[  78,  426]],
@@ -197,22 +227,19 @@ if __name__ == '__main__':
     #     show_pic(current_pic_arr)
 
     # with test("show max square in area pic"):
-    #     gray_arr.mean().pp()
-    #     threshold_value = int(gray_arr.mean()*0.7)
-    #     threshold_value.pp()
-    #     not_use,current_pic_arr = cv2.threshold(gray_area_arr,threshold_value,WHITE,0)
+    #     current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_area_arr)
     #     # current_pic_arr = color_area_arr
     #     area_max_square = find_max_square(current_pic_arr)
     #     cv2.drawContours(current_pic_arr,[area_max_square],-1,(0,255,255),1)
     #     show_pic(current_pic_arr)
 
     with test("show number pic"):
-        threshold_value = int(gray_area_arr.mean()*0.7)
-        not_use,current_pic_arr = cv2.threshold(gray_area_arr,threshold_value,WHITE,1)
+        current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_area_arr)
         area_max_square = find_max_square(current_pic_arr)
         indexs = cal_squre_area_indexs(area_max_square)
         ragion_indexs_arr = cal_split_ragion_indexs_arr(*indexs)
-        not_use,current_pic_arr = cv2.threshold(gray_area_arr,WHITE,0,0)
+
+        current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_area_arr)
         for cur_indexs in ragion_indexs_arr:
             current_pic_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]] = \
                 gray_area_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]]
@@ -222,14 +249,16 @@ if __name__ == '__main__':
         # show_pic(current_pic_arr)
 
     with test("show one number pic"):
-        threshold_value = int(gray_arr.mean()*0.7)
-        not_use,current_pic_arr = cv2.threshold(gray_area_arr,threshold_value,WHITE,0)
+        # threshold_value = int(gray_arr.mean()*0.7)
+        # not_use,current_pic_arr = cv2.threshold(gray_area_arr,threshold_value,WHITE,0)
+        current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_area_arr)
         cur_indexs = ragion_indexs_arr[0]
         current_pic_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]] = \
             gray_area_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]]
         # show_pic(current_pic_arr)
+
         one_number_pic = gray_area_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]].copy()
-        not_use,one_number_pic = cv2.threshold(one_number_pic,threshold_value,WHITE,0)
+        # one_number_pic = cv2_helper.threshold_white_with_mean_percent(one_number_pic)
         # show_pic(one_number_pic)
         # one_number_pic.pp()
         # transfer_values(one_number_pic, {WHITE:0, BLACK:1})
