@@ -1,7 +1,8 @@
 import numpy
 import cv2
 
-import cv2_helper
+from picture_sudoku.helpers import cv2_helper
+from picture_sudoku.helpers import numpy_helper
 
 
 BLACK = cv2_helper.BLACK
@@ -32,7 +33,7 @@ def find_sudoku_number_binary_arr(gray_pic_arr):
     # cv2_helper.show_rects_in_pic(gray_pic_arr, number_rects)
 
 
-    binary_pic = transfer_values(threshed_pic_array, {BLACK:0, WHITE:1})
+    binary_pic = numpy_helper.transfer_values_quickly(threshed_pic_array, {BLACK:0, WHITE:1})
     number_binary_ragions = map(lambda c: cv2_helper.get_rect_ragion_with_rect(binary_pic, c),
         number_rects)
 
@@ -69,13 +70,6 @@ def enlarge(pic_array):
     return cv2.resize(pic_array, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_CUBIC);
 
 
-
-
-def splite_arr_by_ragion_indexs_arr(arr, ragion_indexs_arr):
-    return [arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]] 
-        for cur_indexs in ragion_indexs_arr]
-
-
 def find_max_square(threshed_pic_array):
     squares = cv2_helper.find_contours(threshed_pic_array, is_almost_square)
     square_perimeter_arr = [cv2.arcLength(i,True) for i in squares]
@@ -97,46 +91,6 @@ def is_almost_square(contour, accuracy=0.001):
         return True
     return False
 
-def cal_squre_area_indexs(contour):
-    '''
-        calculate the square area values,
-        return the start_row_index, end_row_index, start_col_index, end_col_index.
-        It can be used like: pic_arr[start_row_index:end_row_index, start_col_index:end_col_index]
-        The square must be horizonal.
-    '''
-    points_count = 4
-    flat_arr = contour.flatten('F')
-    col_indexs = flat_arr[0: points_count]
-    col_indexs.sort()
-    row_indexs = flat_arr[points_count: points_count*2]
-    row_indexs.sort()
-    return row_indexs[1], row_indexs[2], col_indexs[1], col_indexs[2]
-
-def cal_split_ragion_indexs_arr(start_row_index, end_row_index, start_col_index, end_col_index, 
-    split_num=9, modified_percent=0.15):
-    '''
-        firstly row, then col
-    '''
-    step = int((end_row_index - start_row_index) / split_num)
-    modifer = int(step*modified_percent)
-    # return [(i,j) for i in range(split_num) for j in range(split_num)]
-    result = [(start_row_index+i*step+modifer, start_row_index+(i+1)*step-modifer, 
-        start_col_index+j*step+modifer, start_col_index+(j+1)*step-modifer) 
-        for i in range(split_num) for j in range(split_num)]
-    return result
-
-
-def transfer_values(arr, rule_hash, is_reverse=False):
-    '''
-        rule_hash = {0:1, 255:0}
-    '''
-    if not is_reverse:
-        for source, target in rule_hash.items():
-            arr[arr==source] = target
-    else:
-        for target, source in rule_hash.items():
-            arr[arr==source] = target
-    return arr
 
 def clip_array_by_fixed_size(pic_array, fixed_height=32, fixed_width=32, delta_start_y=3):
     height, width = pic_array.shape
@@ -175,39 +129,6 @@ if __name__ == '__main__':
                                [[ 675, 1012]]])
         is_almost_square(contour).must_equal(False)
 
-    with test("cal_squre_area_indexs"):
-        contour = numpy.array([[[ 671,  421]],
-                               [[  78,  426]],
-                               [[  85, 1016]],
-                               [[ 675, 1012]]])
-        cal_squre_area_indexs(contour).must_equal((426, 1012, 85, 671))
-
-    with test("cal_split_ragion_indexs_arr"):
-        indexs = (426, 1012, 85, 671)
-        ragion_indexs = cal_split_ragion_indexs_arr(*indexs)
-        ragion_indexs[0:9].must_equal(
-            [(435, 482, 94, 141),
-             (435, 482, 159, 206),
-             (435, 482, 224, 271),
-             (435, 482, 289, 336),
-             (435, 482, 354, 401),
-             (435, 482, 419, 466),
-             (435, 482, 484, 531),
-             (435, 482, 549, 596),
-             (435, 482, 614, 661)])
-        ragion_indexs.size().must_equal(81)
-
-    with test("transfer_values"):
-        arr = numpy.array([[255, 255, 255, 0, 255, 255, 255],
-                     [255, 255, 255, 0, 255, 255, 255]])
-        transfer_values(arr, {0:1, 255:0}).must_equal(
-            numpy.array([[0, 0, 0, 1, 0, 0, 0],
-                         [0, 0, 0, 1, 0, 0, 0]]), numpy.allclose)
-
-    with test("splite_arr_by_ragion_indexs_arr"):
-        cur_indexs=[0,10,0,10]
-        splite_arr_by_ragion_indexs_arr(gray_arr, [cur_indexs])[0].must_equal(
-            gray_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]], numpy.allclose)
 
     with test("find_max_square"):
         current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_arr)
@@ -233,36 +154,6 @@ if __name__ == '__main__':
     #     cv2.drawContours(current_pic_arr,[area_max_square],-1,(0,255,255),1)
     #     show_pic(current_pic_arr)
 
-    with test("show number pic"):
-        current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_area_arr)
-        area_max_square = find_max_square(current_pic_arr)
-        indexs = cal_squre_area_indexs(area_max_square)
-        ragion_indexs_arr = cal_split_ragion_indexs_arr(*indexs)
-
-        current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_area_arr)
-        for cur_indexs in ragion_indexs_arr:
-            current_pic_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]] = \
-                gray_area_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]]
-        # cur_indexs = ragion_indexs_arr[3]
-        # current_pic_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]] = \
-        #     gray_area_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]]
-        # show_pic(current_pic_arr)
-
-    with test("show one number pic"):
-        # threshold_value = int(gray_arr.mean()*0.7)
-        # not_use,current_pic_arr = cv2.threshold(gray_area_arr,threshold_value,WHITE,0)
-        current_pic_arr = cv2_helper.threshold_white_with_mean_percent(gray_area_arr)
-        cur_indexs = ragion_indexs_arr[0]
-        current_pic_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]] = \
-            gray_area_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]]
-        # show_pic(current_pic_arr)
-
-        one_number_pic = gray_area_arr[cur_indexs[0]:cur_indexs[1],cur_indexs[2]:cur_indexs[3]].copy()
-        # one_number_pic = cv2_helper.threshold_white_with_mean_percent(one_number_pic)
-        # show_pic(one_number_pic)
-        # one_number_pic.pp()
-        # transfer_values(one_number_pic, {WHITE:0, BLACK:1})
-        # numpy.savetxt("test5.dataset",one_number_pic,fmt="%3d")
 
     with test("find_sudoku_number_binary_arr"):
         number_binary_arr = find_sudoku_number_binary_arr(gray_arr)
@@ -271,6 +162,6 @@ if __name__ == '__main__':
         white_count = numpy.count_nonzero(1-number_5)
         row_count, col_count = number_5.shape
         (row_count*col_count).must_equal(black_count+white_count)
-        black_count.must_equal(91)
+        black_count.must_equal(364)
         # number_5 = clip_array_by_fixed_size(number_5,delta_start_y=-5)
         numpy.savetxt("test5.dataset",number_5,fmt="%d", delimiter='')
