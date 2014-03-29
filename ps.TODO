@@ -6,7 +6,7 @@
  ✔ test font number error with svm. @done (14-03-15 15:53)
  ✔ refactor svm implementation. @done (14-03-15 15:53)
  ☐ observate many different sudoku pics, remove border masterly for different pics
- ☐ get all numbers binary arrays from a sudoku pic.
+ ☐ get all numbers binary arrays from a sudoku pic, using canny
  ☐ test the the numbers binary arrays by digital recongnition.
  ☐ create a website which accept the sudoku pic, and give the sudoku puzzle, not give an answer.
  ☐ create android app to give the sudoku answer.

@@ -23,15 +23,17 @@ def get_rect_ragion_with_rect(pic_array, rect):
 
 def rect_to_contour(rect):
     '''
-        # The contour could be different with the origanal one 
+        The contour could be different with the origanal one 
         which generate the rect by cv2.boundingRect(contour),
         since the rect cannot represent all information.
+        And the other difference would be normally the contour.shape 
+        is (4,1,2), but this one is (4,2)
     '''
     x, y, width, height = rect
-    return numpy.array([(x+width-1,  y),
-                        (x,          y),
-                        (x,          y+height-1),
-                        (x+width-1,  y+height-1)])
+    return numpy.array([(x,         y),
+                        (x,         y+height-1),
+                        (x+width-1, y+height-1),
+                        (x+width-1, y)])
 
 def cal_nonzero_rect(pic_array):
     y_indexs, x_indexs = numpy.nonzero(pic_array)
@@ -71,29 +73,29 @@ def cal_nonzero_rect_as_pic_ratio(pic_array):
     rect = cal_nonzero_rect(pic_array)
     return modify_rect_as_pic_ratio(rect, pic_array.shape)
 
-
-
-
-def transfer_values(arr, rule_hash):
+def get_contour_points(contour):
+    ''' another way to get the rect of a contour
+        just like boundingRect
     '''
-        rule_hash = {0:1, 255:0}
-    '''
-    for (i, j), value in numpy.ndenumerate(arr):
-        # if value in rule_hash.keys():
-        arr[i,j] = rule_hash[value]
-    return arr
+    rect = cv2.minAreaRect(contour)
+    box = cv2.cv.BoxPoints(rect)
+    box = numpy.int0(box)
+    return box
+
 
 def cal_split_ragion_rects(contour, split_x_num, split_y_num):
     '''
         Calculate the split ragion rect in a contour.
         The rect is a tuple, like (x, y, width, height)
     '''
-    x, y, width, height = cv2.boundingRect(contour)
-    x_step = int(width / split_x_num)
-    y_step = int(height / split_y_num)
-    result = tuple((x+i*x_step, y+j*y_step, x_step, y_step) 
-        for j in range(split_y_num) for i in range(split_x_num))
-    return result
+    # x, y, width, height = cv2.boundingRect(contour)
+    # x_step = int(width / split_x_num)
+    # y_step = int(height / split_y_num)
+    # result = tuple((x+i*x_step, y+j*y_step, x_step, y_step) 
+    #     for j in range(split_y_num) for i in range(split_x_num))
+    return Rect.cal_split_ragion_rects(cv2.boundingRect(contour), split_x_num, split_y_num)
+
+
 
 def save_binary_pic_txt(file_name, binary_pic):
     return numpy.savetxt(file_name, binary_pic, fmt='%d', delimiter='')
@@ -122,8 +124,18 @@ def clip_array_by_percent(pic_array, percent=0.1):
     return pic_array[clip_y_count:height-clip_y_count, 
             clip_x_count:width-clip_x_count]
 
+def clip_array_by_four_percent(pic_array, 
+        top_percent=0.1, bottom_percent=0.1, left_percent=0.1, right_percent=0.1):
+    height, width = pic_array.shape
+    clip_top_count = int(round(height * top_percent))
+    clip_bottom_count = int(round(height * bottom_percent))
+    clip_left_count = int(round(width * left_percent))
+    clip_right_count = int(round(width * right_percent))
+    return pic_array[clip_top_count:height-clip_bottom_count, 
+            clip_left_count:width-clip_right_count]
 
-def find_contours(threshed_pic_array, filter_func, accuracy_percent_with_perimeter=0.01):
+
+def find_contours(threshed_pic_array, filter_func = None, accuracy_percent_with_perimeter=0.01):
     '''
         notice: the threshold_value is the key, if it directly impact the binary matrix.
     '''
@@ -136,32 +148,169 @@ def find_contours(threshed_pic_array, filter_func, accuracy_percent_with_perimet
         return cv2.approxPolyDP(contour,approximation_accuracy,True)
 
     contours = map(get_approximated_contour, contours)
-    return filter(filter_func, contours)
-
+    if filter_func:
+        contours = filter(filter_func, contours)
+    return contours
 
 def threshold_white_with_mean_percent(gray_pic, mean_percent=0.7):
     threshold_value = int(gray_pic.mean()*mean_percent)
     not_use, threshed_pic_array = cv2.threshold(gray_pic,threshold_value,WHITE,cv2.THRESH_BINARY_INV)
     return threshed_pic_array
 
+def resize_with_fixed_height(pic_array, height=700):
+    width = float(height) / pic_array.shape[0]
+    dim = (int(pic_array.shape[1] * width), height)
+    return cv2.resize(pic_array, dim, interpolation = cv2.INTER_AREA)
+
+
+class Rect(object):
+    '''
+        x, y, width, height = rect
+    '''
+    @staticmethod
+    def cal_split_ragion_rects(rect, split_x_num, split_y_num):
+        x, y, width, height = rect
+        x_step = int(width / split_x_num)
+        y_step = int(height / split_y_num)
+        result = tuple((x+i*x_step, y+j*y_step, x_step, y_step) 
+            for j in range(split_y_num) for i in range(split_x_num))
+        return result
+
+    @staticmethod
+    def adjust_to_minimum(rect):
+        x, y, width, height = rect
+        min_width_or_height = min(width, height)
+
+        return (x, y, min_width_or_height, min_width_or_height)
+
+class Contour(object):
+    @staticmethod
+    def mass_center(contour):
+        moments = cv2.moments(contour)
+        if moments['m00'] == 0:
+            return (1, 1)
+        return ( moments['m10']/moments['m00'], moments['m01']/moments['m00'])
+
+    @staticmethod
+    def four_endpoints(contour):
+        '''
+            It will adjust points to top-left, top-right, bottom-right, bottom-left.
+            So it asks the contour is a rectangle
+        '''
+        points = contour.copy().reshape((4,2))
+        results = points.copy()
+        x_mean, y_mean = numpy.mean(points, axis=0)
+        for point in points:
+            if point[0] < x_mean and point[1] < y_mean:
+                results[0] = point
+            if point[0] < x_mean and point[1] > y_mean:
+                results[1] = point
+            if point[0] > x_mean and point[1] > y_mean:
+                results[2] = point
+            if point[0] > x_mean and point[1] < y_mean:
+                results[3] = point
+        return results
+
+
+
+class Points(object):
+    @staticmethod
+    def cal_step_points(two_endpoints_in_line, step_count):
+        '''
+            two_endpoints_in_line are the two point of a line.
+            step_count will be the points on that line between the two endpoints.
+        '''
+        step_distance = numpy.float32(two_endpoints_in_line[-1] - two_endpoints_in_line[0]) / step_count
+        points_list = [(two_endpoints_in_line[0] + index * step_distance)
+                for index in range(step_count+1)]
+        return numpy.array(numpy.int32(points_list)).reshape((10,2))
+    
+    @staticmethod
+    def cal_internal_points(four_endpoints_in_rectangle, x_step_count, y_step_count):
+        left_points = Points.cal_step_points(four_endpoints_in_rectangle[0:2], y_step_count)
+        rifht_points = Points.cal_step_points(four_endpoints_in_rectangle[::-1][0:2], y_step_count)
+        internal_points = [] 
+        for left_point, right_point in zip(left_points, rifht_points):
+            # (left_point, right_point).pp()
+            endpoints = numpy.append(left_point, right_point).reshape(2,2)
+            internal_points.append(Points.cal_step_points(endpoints, x_step_count))
+
+        # for index in range(x_step_count+1):
+        # numpy.append(points[0], points[1]).reshape(2,2)
+        return numpy.array(internal_points).reshape((x_step_count+1)*(y_step_count+1),2)
+
 '''
     The below methods are for test.
 '''
 
-def show_pic(pic_array):
-    cv2.imshow('pic', pic_array)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+class Image(object):
+    @staticmethod
+    def center_point(the_image):
+        height, width = the_image.shape
+        ''' x, y'''
+        return (width/2, height/2)
+
+    @staticmethod
+    def show_points_with_color(the_image, points):
+        color_image = cv2.cvtColor(the_image, cv2.COLOR_GRAY2BGR)
+        for point in points:
+            point = tuple(point)
+            point.pp()
+            cv2.circle(color_image,point,4,(0,255,0),-1)
+        show_pic(color_image)
+
+    @staticmethod
+    def generate_mask(shape):
+        return numpy.zeros(shape, dtype=numpy.uint8)
+
+    @staticmethod
+    def fill_contours(the_image, contours, color = WHITE):
+        cv2.drawContours(the_image, contours, -1, color, -1)
+        return the_image
+
+    @staticmethod
+    def show(the_image, image_name='image'):
+        cv2.imshow(image_name, the_image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+
+def show_pic(the_image):
+    Image.show(the_image)
+    # # cv2.namedWindow('pic', cv2.WINDOW_NORMAL)
+    # # cv2.setWindowProperty("pic", cv2.WND_PROP_FULLSCREEN, cv2.cv.CV_WINDOW_FULLSCREEN)
+    # # cv2.namedWindow('pic', cv2.WINDOW_NORMAL)
+    # # cv2.namedWindow('pic', cv2.WINDOW_AUTOSIZE | cv2.cv.CV_GUI_EXPANDED)
+    # cv2.imshow('pic', pic_array)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
 def show_contours_in_pic(pic_array, contours, color=(0,255,255)):
     cv2.drawContours(pic_array,contours, -1, color ,1)
     show_pic(pic_array)
 
+def show_contours_in_color_pic(pic_array, contours, color=(0,255,255)):
+    show_contours_in_pic(cv2.cvtColor(pic_array, cv2.COLOR_GRAY2BGR), contours, color)
+
 def show_rects_in_pic(pic_array, rects, color=(0,255,255)):
     contours = map(rect_to_contour, rects)
     show_contours_in_pic(pic_array, contours, color)
 
-def show_same_size_ragions_as_pic(ragions, count_in_row, init_value=BLACK):
+def show_rects_in_color_pic(pic_array, rects, color=(0,255,255)):
+    show_rects_in_pic(cv2.cvtColor(pic_array, cv2.COLOR_GRAY2BGR), rects, color)
+
+def show_rect(pic_array, rect):
+    sub_pic_array = get_rect_ragion_with_rect(pic_array, rect)
+    show_pic(sub_pic_array)
+
+def show_points_in_color_pic(pic_array, points):
+    for point in points:
+        cv2.circle(cv2.cvtColor(pic_array, cv2.COLOR_GRAY2BGR),point,4,(0,255,0),-1)
+    show_pic(pic_array)
+
+
+
+def show_same_size_ragions_as_pic(ragions, count_in_row=9, init_value=BLACK):
     pic_array = join_ragions_as_pic(ragions, count_in_row, init_value)
     show_pic(pic_array)
 
@@ -171,16 +320,17 @@ def join_ragions_as_pic(ragions, count_in_row, init_value=BLACK):
         for test
     '''
     ragion_count = len(ragions)
+    # ragion_count.pp()
     ragion_row_count = int(ragion_count / count_in_row) + 1
     steps = 4
     ragion_height, ragion_width = ragions[0].shape
-    ragions[0].shape.pp()
+    # ragions[0].shape.pp()
     width = count_in_row * ragion_width + (count_in_row + 1) * steps
     height = ragion_row_count * ragion_height + (ragion_row_count + 1) * steps
 
-    pic_array = numpy.zeros((height, width)) + init_value
+    pic_array = numpy.zeros((height, width), dtype=numpy.uint8) + init_value
     # pic_array.shape.pp()
-    # cv2_helper.show_pic(pic_array)
+    # show_pic(pic_array)
 
     for i in range(ragion_row_count):
         for j in range(count_in_row):
@@ -190,6 +340,15 @@ def join_ragions_as_pic(ragions, count_in_row, init_value=BLACK):
             x_index = (i+1)*steps+i*ragion_height
             y_index = (j+1)*steps+j*ragion_width
             pic_array[x_index:x_index+ragion_height, y_index:y_index+ragion_width] = ragions[ragion_index]
+            # if ragion_index == 1:
+            #     aa = pic_array[x_index:x_index+ragion_height, y_index:y_index+ragion_width] 
+            #     aa.shape.pp()
+            #     ragions[ragion_index].shape.pp()
+            #     aa.pp()
+            #     ragions[ragion_index].pp()
+            #     # x_index.pp()
+            #     # y_index.pp()
+            #     show_pic(aa)
     return pic_array
 
 
@@ -204,6 +363,7 @@ if __name__ == '__main__':
 
     small_number_path = 'test_resources/small_number.dataset'
 
+
     def binary_number_to_lists(file_path):
         with open(file_path) as data_file:
             result = [int(line[index]) for line in data_file 
@@ -212,6 +372,9 @@ if __name__ == '__main__':
 
     def list_to_image_array(the_list, shape=(IMG_SIZE,IMG_SIZE)):
         return numpy.array(the_list, numpy.uint8).reshape(shape)
+
+    with test("Image.center_point"):
+        Image.center_point(gray_pic).must_equal((247, 117))
 
     with test("get_rect_ragion"):
         contour = numpy.array([[[ 171,  21]],
@@ -253,17 +416,10 @@ if __name__ == '__main__':
                                [[ 175, 212]]])
         rect = (18, 21, 158, 196)
         rect_to_contour(rect).must_equal(
-            numpy.array([  [175,  21],
-                           [ 18,  21],
+            numpy.array([  [ 18,  21],
                            [ 18, 216],
-                           [175, 216]]), numpy.allclose)
-
-    with test("transfer_values"):
-        arr = numpy.array([[9, 9, 9, 1, 9, 9, 9],
-                     [9, 9, 9, 1, 9, 9, 9]])
-        transfer_values(arr, {9:1, 1:-1}).must_equal(
-            numpy.array([[1, 1, 1, -1, 1, 1, 1],
-                         [1, 1, 1, -1, 1, 1, 1]]), numpy.allclose)
+                           [175, 216],
+                           [175,  21]]), numpy.allclose)
 
     with test("clip_array_by_x_y_count"):
         arr = numpy.arange(81).reshape((9,9))
@@ -292,7 +448,6 @@ if __name__ == '__main__':
     with test("cal_nonzero_rect"):
         image_list = binary_number_to_lists(small_number_path)
         image_array = list_to_image_array(image_list)
-        transfer_values(image_array, {1:255, 0:0})
         cur_rect = cal_nonzero_rect(image_array)
         cur_rect.must_equal((10, 9, 12, 18))
 
@@ -321,7 +476,57 @@ if __name__ == '__main__':
         arr[1,1] = 1 
         is_not_empty_pic(arr).must_equal(True)
 
-    # with testsize"):
+    with test("Rect.adjust_to_minimum"):
+        rect = (153, 13, 668, 628)
+        Rect.adjust_to_minimum(rect).must_equal((153, 13, 628, 628))
+
+    with test("Contour.four_endpoints"):
+        contour = numpy.array(
+              [[[384, 225]],
+               [[ 42, 249]],
+               [[ 49, 583]],
+               [[384, 569]]], dtype=numpy.int32)
+        Contour.four_endpoints(contour).must_equal(numpy.array(
+              [[ 42, 249],
+               [ 49, 583],
+               [ 384, 569],
+               [ 384, 225]]), numpy.allclose)
+
+
+    with test("Points.cal_step_points"):
+        endpoints = numpy.array([[153,  13],
+            [187, 640]], dtype=numpy.int32)
+        Points.cal_step_points(endpoints, step_count=9).must_equal(
+            numpy.array(  [[153,  13],
+                           [156,  82],
+                           [160, 152],
+                           [164, 222],
+                           [168, 291],
+                           [171, 361],
+                           [175, 431],
+                           [179, 500],
+                           [183, 570],
+                           [187, 640]]), numpy.allclose)
+    with test("Points.cal_internal_points"):
+        contour = numpy.array(
+              [[[384, 225]],
+               [[ 42, 249]],
+               [[ 49, 583]],
+               [[384, 569]]], dtype=numpy.int32)
+        four_endpoints = Contour.four_endpoints(contour)
+        Points.cal_internal_points(four_endpoints, 9, 9).shape.must_equal((100,2))
+
+    with test("Image.fill_contours"):
+        mask = Image.generate_mask((600, 400))
+        contour = numpy.array(
+              [[[384, 225]],
+               [[ 42, 249]],
+               [[ 49, 583]],
+               [[384, 569]]], dtype=numpy.int32)
+        Image.fill_contours(mask, [contour])
+        show_pic(mask)
+
+    # with test("resize"):
     #     image_list = binary_number_to_lists(small_number_path)
     #     image_array = list_to_image_array(image_list)
     #     cur_rect = (7, 9, 18, 18)
