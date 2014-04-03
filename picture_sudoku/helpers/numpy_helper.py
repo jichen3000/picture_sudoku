@@ -29,6 +29,9 @@ def transfer_values_quickly(arr, rule_hash):
         handled_values.append(value)
     return result
 
+def is_array_none(the_array):
+    return numpy.all(the_array, None)==None
+
 
 if __name__ == '__main__':
     from minitest import *
@@ -41,12 +44,6 @@ if __name__ == '__main__':
                          [0, 0, 0, 1, 0, 0, 0]]), numpy.allclose)
 
     with test("transfer_values_quickly"):
-        # arr = numpy.array([[1, 1, 1, -1, 1, 1, 1],
-        #              [1, 1, 1, -1, 1, 1, 1]])
-        # transfer_values_quickly(arr, {1:0, -1:2}).must_equal(
-        #     numpy.array([[0, 0, 0, 2, 0, 0, 0],
-        #                  [0, 0, 0, 2, 0, 0, 0]]), numpy.allclose)
-
         arr = numpy.array([[1, 9],
                      [1, 9]])
         (lambda : transfer_values_quickly(arr, {9:1, 1:-1})).must_raise(Exception, 
@@ -54,3 +51,9 @@ if __name__ == '__main__':
         transfer_values(arr, {9:1, 1:-1}).must_equal(
             numpy.array([[-1, 1],
                          [-1, 1]]), numpy.allclose)
+
+    with test("is_array_none"):
+        is_array_none(None).must_equal(True)
+        arr = numpy.array([[1, 1, 1, 0, 1, 1, 1],
+                     [1, 1, 1, 0, 1, 1, 1]])
+        is_array_none(arr).must_equal(False)

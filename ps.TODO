@@ -11,6 +11,7 @@
  ☐ create a website which accept the sudoku pic, and give the sudoku puzzle, not give an answer.
  ☐ create android app to give the sudoku answer.
  ☐ ensmall the pic when upload to the server.
-
+ ✔ test divide 9 for square. It's not a good solution since the ragion divided will get wrong space. @done (14-03-31 11:53)
+ 
 
 

@@ -32,7 +32,8 @@ def find_sudoku_number_binary_arr(gray_pic_arr):
     square = find_max_square(threshed_pic_array)
     # cv2_helper.show_contours_in_pic(threshed_pic_array, [square])
 
-    number_rects = cv2_helper.cal_split_ragion_rects(square, 9, 9)
+    square_rect=cv2.boundingRect(square)
+    number_rects = cv2_helper.Rect.cal_split_ragion_rects(square_rect, 9, 9)
     # cv2_helper.show_rects_in_pic(gray_pic_arr, number_rects)
 
 
@@ -367,8 +368,8 @@ if __name__ == '__main__':
         pic_file_path.pp()
         gray_pic_array = cv2.imread(pic_file_path, 0)
         color_pic_array  = cv2.imread(pic_file_path)
-        gray_pic_array = cv2_helper.resize_with_fixed_height(gray_pic_array)
-        color_pic_array = cv2_helper.resize_with_fixed_height(color_pic_array)
+        gray_pic_array = cv2_helper.Image.resize_keeping_ratio_by_height(gray_pic_array)
+        color_pic_array = cv2_helper.Image.resize_keeping_ratio_by_height(color_pic_array)
         # threshed_pic_array = cv2.adaptiveThreshold(gray_pic_array,WHITE,
         #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, 19, 2)
         threshed_pic_array = cv2.adaptiveThreshold(gray_pic_array,WHITE,
@@ -385,24 +386,25 @@ if __name__ == '__main__':
             '''
             square_rect = cv2.boundingRect(approximated_square)
             square_rect = cv2_helper.Rect.adjust_to_minimum(square_rect)
-            square_rect_contour = cv2_helper.rect_to_contour(square_rect)
+            # square_rect_contour = cv2_helper.rect_to_contour(square_rect)
 
             # approximated_square.pp()
             # square_rect_contour.pp()
 
             # approximated_square.shape is (4,1,2)
             approximated_square_float = numpy.float32(approximated_square.copy())
-            approximated_square_float = cv2_helper.Contour.four_endpoints(approximated_square_float)
-            square_rect_contour_float = numpy.float32(square_rect_contour.copy())
+            approximated_square_float = cv2_helper.Quadrilateral.vertices(approximated_square_float)
+            # square_rect_contour_float = numpy.float32(square_rect_contour.copy())
+            square_rect_contour_float = numpy.float32(cv2_helper.Rect.vertices(square_rect))
 
             retval = cv2.getPerspectiveTransform(approximated_square_float,square_rect_contour_float)
             dsize = pic_array.shape[::-1]
             warp = cv2.warpPerspective(pic_array,retval,dsize)
             return warp, square_rect
 
-        # four_endpoints = cv2_helper.Contour.four_endpoints(max_contour)
-        # # top_points = cv2_helper.Points.cal_step_points(four_endpoints[:2], 9)
-        # internal_points = cv2_helper.Points.cal_internal_points(four_endpoints,9,9)
+        # four_endpoints = cv2_helper.Quadrilateral.vertices(max_contour)
+        # # top_points = cv2_helper.Points.cal_step_points(four_endpoints[:2], 10)
+        # internal_points = cv2_helper.Points.cal_internal_points(four_endpoints,10,10)
         # cv2_helper.Image.show_points_with_color(gray_pic_array, internal_points)
 
 
@@ -515,8 +517,8 @@ if __name__ == '__main__':
         pic_file_path = '../resource/example_pics/sample01.dataset.jpg'
         gray_pic_array = cv2.imread(pic_file_path, 0)
         color_pic_array  = cv2.imread(pic_file_path)
-        gray_pic_array = cv2_helper.resize_with_fixed_height(gray_pic_array)
-        color_pic_array = cv2_helper.resize_with_fixed_height(color_pic_array)
+        gray_pic_array = cv2_helper.Image.resize_keeping_ratio_by_height(gray_pic_array)
+        color_pic_array = cv2_helper.Image.resize_keeping_ratio_by_height(color_pic_array)
 
         # find_sudoku_number_binary_arr2(gray_pic_array)
         # for i in range(1,15):

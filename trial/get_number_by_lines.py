@@ -122,8 +122,8 @@ def main(image_path):
     img = cv2.imread(image_path)
     img = cv2.GaussianBlur(img,(5,5),0)
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    gray = cv2_helper.resize_with_fixed_height(gray)
-    img = cv2_helper.resize_with_fixed_height(img)
+    gray = cv2_helper.Image.resize_keeping_ratio_by_height(gray)
+    img = cv2_helper.Image.resize_keeping_ratio_by_height(img)
     # gray = cv2.imread(image_path, 0)
     # show_pic(gray)
 
@@ -137,7 +137,7 @@ def main(image_path):
     len(best_cnt).pp()
 
     res = get_masked_pic(res, best_cnt)
-    # show_pic(res)
+    show_pic(res)
 
     ''' 
         Finding Vertical lines
