@@ -73,11 +73,71 @@ def find_small_square_contour(the_image, outer_square_contour, square_count_in_r
     '''
     square_count = square_count_in_row ** 2
     if is_blur:
+        # the_image = cv2.GaussianBlur(the_image,ksize=(5,5), sigmaX=0)
+        the_image = cv2.bilateralFilter(the_image, 5, 10, 3)
+
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    # the_image = cv2.morphologyEx(the_image, cv2.MORPH_CLOSE, kernel)
+    # the_image = cv2.morphologyEx(the_image, cv2.MORPH_OPEN, kernel)
+    # the_image = cv2.erode(the_image, kernel, iterations=2)
+    # the_image = cv2.dilate(the_image, kernel, iterations=1)
+    # the_image = cv2.adaptiveThreshold(the_image,WHITE,
+    #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
+
+
+    low_threshold, high_threshold = 40, 80
+    # low_threshold, high_threshold = 80, 250
+
+    the_image = cv2.Canny(the_image, low_threshold, high_threshold)
+    # cv2_helper.Image.show(the_image)
+
+
+    # the_image = cv2.adaptiveThreshold(the_image,WHITE,
+    #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
+    # cv2_helper.Image.show(the_image)
+
+
+
+
+    expected_perimeter = cv2.arcLength(outer_square_contour,True) / square_count_in_row
+    expected_area = cv2.contourArea(outer_square_contour) / square_count
+    def filter_perimeter(contour):
+        hull = cv2.convexHull(contour)
+        # hull = contour
+        # return True
+        # return cv2.arcLength(hull,True) > expected_perimeter * 0.9
+        perimeter_flag = list_helper.is_in_range(cv2.arcLength(hull,True), expected_perimeter, 0.3)
+        if not perimeter_flag:
+            return False
+        area = cv2.contourArea(hull)
+        return list_helper.is_in_range(area, expected_area, 0.3)
+
+
+
+    contours = cv2_helper.Image.find_contours(
+        the_image, filter_perimeter, 0.0001)
+    # len(contours).pp()
+    contours = map(cv2.convexHull, contours)
+    # contours = map(convert_to_square, contours)
+    # cv2_helper.Image.show_contours_with_color(the_image, contours)
+
+    for contour in contours:
+        cv2_helper.Image.show_contours_with_color(the_image, [contour])
+    return contours
+
+def find_small_square_contour_original(the_image, outer_square_contour, square_count_in_row, is_blur=False):
+    '''
+        Now, square_count_in_row will be SUDOKU_SIZE AKA 9 or SUDOKU_SIZE 3
+    '''
+    square_count = square_count_in_row ** 2
+    if is_blur:
         the_image = cv2.GaussianBlur(the_image,ksize=(5,5), sigmaX=0)
 
     the_image = cv2.adaptiveThreshold(the_image,WHITE,
         cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
-    # cv2_helper.Image.show(the_image)
+    cv2_helper.Image.show(the_image)
 
     expected_perimeter = cv2.arcLength(outer_square_contour,True) / square_count_in_row
     expected_area = cv2.contourArea(outer_square_contour) / square_count
@@ -93,8 +153,9 @@ def find_small_square_contour(the_image, outer_square_contour, square_count_in_r
 
     contours = cv2_helper.Image.find_contours(
         the_image, filter_perimeter, 0.001)
+
     # len(contours).pp()
-    # cv2_helper.Image.show_contours_with_color(the_image, contours)
+    cv2_helper.Image.show_contours_with_color(the_image, contours)
     # for contour in contours:
     #     cv2_helper.Image.show_contours_with_color(the_image, [contour])
     return contours
@@ -106,8 +167,8 @@ def speculate_lost_squares():
 def sort_squares_as_sudoku(squares, max_square):
     ''' '''
     square_centers = map(cv2_helper.Quadrilateral.center, squares)
-    [s[0] for s in square_centers].pp()
-    max_square.pp()
+    # [s[0] for s in square_centers].pp()
+    # max_square.pp()
     top_left, bottom_left, bottom_right, top_right = \
             cv2_helper.Quadrilateral.vertices(max_square)
     y_delta = abs((bottom_right[1] - bottom_left[1]) - (top_right[1] - top_left[1]))
@@ -159,12 +220,12 @@ def find_sudoku_number_binary_arr(gray_image):
     len(small_contours).p()
 
     ''' to square which only have tow vertices'''
-    small_squares = map(convert_to_square, small_contours)
+    # small_squares = map(convert_to_square, small_contours)
     # small_squares.size().pp()
     # cv2_helper.Image.show_contours_with_color(square_ragion, small_squares)
 
     ''' sort them as sudoku '''
-    sort_squares_as_sudoku(small_squares,square_contour)
+    # sort_squares_as_sudoku(small_squares,square_contour)
     ''' union the squares which in the same ragion'''
     ''' speculate the lost squares'''
 
@@ -184,8 +245,10 @@ if __name__ == '__main__':
         find_sudoku_number_binary_arr(gray_image)
 
     with test("show_square"):
-        # 8, 11, 12
-        show_square('../resource/example_pics/sample13.dataset.jpg')
+        # 5, iterations = 2
+        # 6, 1
+        # 7, 1, but jsut get 4
+        show_square('../resource/example_pics/sample07.dataset.jpg')
         # for i in range(1,15):
         #     image_path = '../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.jpg'
         #     show_square(image_path)

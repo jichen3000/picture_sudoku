@@ -193,7 +193,15 @@ class Points(object):
     def to_contour(points):
         return numpy.array(points).reshape((4,1,2))
 
-
+    @staticmethod
+    def cal_line_slope(point1, point2):
+        x1, y1 = point1
+        x2, y2 = point2
+        if (x1 - x2) == 0 and (y1 - y2) == 0:
+            raise Exception('These two points are same.')
+        if (x1 - x2) == 0:
+            return float('inf')
+        return (float(y1 - y2) / (x1 - x2))
 
 class Image(object):
     @staticmethod
@@ -575,6 +583,27 @@ if __name__ == '__main__':
                [ 49, 583],
                [ 384, 569],
                [ 384, 225]]), numpy.allclose)
+
+    with test("Points.cal_line_slope"):
+        points = numpy.array([[-1,1],[1,0]])
+        Points.cal_line_slope(points[0], points[1]).must_equal(-0.5)
+        points = ([1,1],[1,-1])
+        Points.cal_line_slope(points[0], points[1]).must_equal(float('inf'))
+
+
+
+    # with test("explain fitLine"):
+    #     line = cv2.fitLine(numpy.array([[-1,1],[1,0]]), distType=cv2.cv.CV_DIST_L2, param=0, reps=0.01, aeps=0.01)
+    #     line.pp()
+    #     the_image = Image.generate_mask((500, 600))
+    #     def draw_line(the_image, line):
+    #         vx,vy,x,y = line
+    #         lefty = int((-x*vy/vx) + y)
+    #         righty = int(((the_image.shape[1]-x)*vy/vx)+y)
+    #         cv2.line(the_image,(the_image.shape[1]-1,righty),(0,lefty),255,1)
+
+    #     draw_line(the_image, line)
+        # Image.show(the_image)
 
     with test("Quadrilateral.center"):
         contour = numpy.array(

@@ -58,8 +58,10 @@ def find_vertical_lines(gray_pic):
     dx = cv2.convertScaleAbs(dx)
     dx.pp()
     cv2.normalize(dx,dx,0,255,cv2.NORM_MINMAX)
+
+    
     # cv2_helper.show_pic(dx)
-    ret,close = cv2.threshold(dx,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    # ret,close = cv2.threshold(dx,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     # close = cv2.adaptiveThreshold(dx,255,
     #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=3, C=2)
 
