@@ -1,82 +1,19 @@
-'''
-    Test in the codes/python/projects/font_number_binary/cv2_helper.py
-'''
-
-
 import cv2
 import numpy
+import operator
 
-
+from cv2_helpers.rect import Rect
 
 BLACK = 0
 WHITE = 255
-
-class Rect(object):
-    '''
-        x, y, width, height = rect
-    '''
-    @staticmethod
-    def modify_to_ratio(rect, shape):
-        '''
-            This method will return the rect which has the same ratio 
-            of row count and col count
-        '''
-        x, y, width, height = rect
-        pic_height, pic_width= shape
-        #height need to be enlarge
-        if pic_height * width > pic_width * height:
-            new_height = int((pic_height * width) / pic_width)
-            delta = int( (new_height - height)/2 )
-            new_y = y - delta
-            if new_y < 0:
-                new_y = 0
-            return x, new_y, width, new_height
-        elif pic_height * width < pic_width * height:
-            new_width = int((pic_width * height) / pic_height)
-            delta = int((new_width-width) / 2)
-            new_x = x - delta
-            if new_x < 0:
-                new_x = 0
-            return new_x, y, new_width, height
-        return rect
-
-    @staticmethod
-    def split_to_rects(rect, split_x_num, split_y_num):
-        x, y, width, height = rect
-        x_step = int(width / split_x_num)
-        y_step = int(height / split_y_num)
-        result = tuple((x+i*x_step, y+j*y_step, x_step, y_step) 
-            for j in range(split_y_num) for i in range(split_x_num))
-        return result
-
-    @staticmethod
-    def adjust_to_minimum(rect):
-        x, y, width, height = rect
-        min_width_or_height = min(width, height)
-
-        return (x, y, min_width_or_height, min_width_or_height)
-
-    @staticmethod
-    def get_ragion(rect, the_image):
-        x, y, width, height = rect
-        return the_image[y:y+height,x:x+width]
-
-    @staticmethod
-    def vertices(rect):
-        x, y, width, height = rect
-        return numpy.array([(x,         y),
-                            (x,         y+height-1),
-                            (x+width-1, y+height-1),
-                            (x+width-1, y)])
-
-    @staticmethod
-    def to_contour(rect):
-        return Rect.vertices(rect).reshape((4,1,2))
 
 
 class Contour(object):
     @staticmethod
     def mass_center(contour):
+        '''
+            Contour.mass_center
+        '''
         moments = cv2.moments(contour)
         if moments['m00'] == 0:
             return (1, 1)
@@ -84,11 +21,17 @@ class Contour(object):
 
     @staticmethod
     def get_rect_ragion(contour, the_image):
+        '''
+            Contour.get_rect_ragion
+        '''
         return Rect.get_ragion(cv2.boundingRect(contour), the_image)
 
 
     @staticmethod
     def vertices_by_min_area(contour):
+        '''
+            Contour.vertices_by_min_area
+        '''
         ''' another way to get the rect of a contour
             just like boundingRect
         '''
@@ -102,6 +45,7 @@ class Quadrilateral(Contour):
     @staticmethod
     def vertices(quadrilateral):
         '''
+            Quadrilateral.vertices
             It will adjust points to top_left, bottom_left, bottom_right, top_right.
         '''
         points = quadrilateral.reshape((4,2))
@@ -119,7 +63,10 @@ class Quadrilateral(Contour):
         return results
 
     @staticmethod
-    def center(quadrilateral):
+    def centroid(quadrilateral):
+        '''
+            Quadrilateral.centroid 
+        '''
         points = quadrilateral.reshape((4,2))
         return numpy.mean(points, axis=0)
 
@@ -127,26 +74,18 @@ class Quadrilateral(Contour):
     @staticmethod
     def split(quadrilateral,  count_in_row, count_in_col):
         '''
+            Quadrilateral.split
             Split to many samll ones.
         '''
         vertices = Quadrilateral.vertices(quadrilateral)
-        all_points = Points.cal_internal_points(vertices, count_in_col+1, count_in_row+1)
-        all_points = all_points.reshape((count_in_col+1, count_in_row+1,2))
-        # all_points.shape.pp()
-        # all_points[3,2].pp()
-        # return [all_points[0, 0], all_points[0, 1], all_points[1, 1], all_points[1,0] ]
-        quadrilaterals = []
-        for x_index in range(count_in_col):
-            for y_index in range(count_in_row):
-                quadrilaterals.append(Points.to_contour(
-                    [all_points[x_index,    y_index], 
-                     all_points[x_index,    y_index+1], 
-                     all_points[x_index+1,    y_index+1], 
-                     all_points[x_index+1,    y_index]]))
-        return quadrilaterals
+        the_points = Points.cal_internal_points(vertices, count_in_col+1, count_in_row+1)
+        return Points.get_quadrilaterals(the_points, count_in_col, count_in_row)
 
     @staticmethod
     def enlarge(quadrilateral, percent=0.05):
+        '''
+            Quadrilateral.enlarge
+        '''
         x, y, width, height = cv2.boundingRect(quadrilateral)
         x_step = int(width * percent)
         y_step = int(height * percent)
@@ -164,8 +103,25 @@ class Quadrilateral(Contour):
 
 class Points(object):
     @staticmethod
+    def get_quadrilaterals(the_points, count_in_col, count_in_row):
+        '''
+            Points.get_quadrilaterals
+            Get the contours which are quadrilaterals.
+        '''
+        all_points = the_points.reshape((count_in_col+1, count_in_row+1,2))
+        quadrilaterals = [Points.to_contour(
+                    [all_points[x_index,    y_index], 
+                     all_points[x_index,    y_index+1], 
+                     all_points[x_index+1,    y_index+1], 
+                     all_points[x_index+1,    y_index]]) 
+                for x_index in range(count_in_col) for y_index in range(count_in_row)]
+        return quadrilaterals
+
+
+    @staticmethod
     def cal_step_points(two_endpoints_in_line, count):
         '''
+            Points.cal_step_points
             two_endpoints_in_line are the two point of a line.
             count will be the points on that line between the two endpoints.
         '''
@@ -177,6 +133,7 @@ class Points(object):
     @staticmethod
     def cal_internal_points(vertices, row_count, col_count):
         '''
+            Points.cal_internal_points
             The point's order will be from left to right then top to bottom.
         '''
         left_points = Points.cal_step_points(vertices[0:2], row_count)
@@ -191,10 +148,18 @@ class Points(object):
 
     @staticmethod
     def to_contour(points):
+        '''
+            Points.to_contour
+            just support 4 points
+        '''
         return numpy.array(points).reshape((4,1,2))
 
     @staticmethod
     def cal_line_slope(point1, point2):
+        '''
+            Points.cal_line_slope
+            calculate the line's slope which go through the two points
+        '''
         x1, y1 = point1
         x2, y2 = point2
         if (x1 - x2) == 0 and (y1 - y2) == 0:
@@ -203,9 +168,113 @@ class Points(object):
             return float('inf')
         return (float(y1 - y2) / (x1 - x2))
 
-class Image(object):
+
+class Ragion(object):
+    ''' Actually it is just a part of image. '''                
+
     @staticmethod
-    def center_point(the_image):
+    def fill(the_ragion, target_shape, fill_value=0):
+        '''
+            Ragion.fill
+            Fill the ragion to the size of target_shape.
+        '''
+        height, width = the_ragion.shape        
+        target_height, target_width = target_shape
+
+        if height > target_height and width > target_width:
+            return the_ragion
+
+        cur_ragion = the_ragion.copy()
+        if target_height > height:
+            top_height = (target_height - height) / 2
+            bottom_height = target_height - top_height - height
+
+            top_mat = numpy.zeros((top_height, width)) + fill_value
+            bottom_mat = numpy.zeros((bottom_height, width)) + fill_value
+
+            cur_ragion = numpy.concatenate((top_mat, cur_ragion, bottom_mat), axis=0)
+
+            # cur_ragion.pp()
+        if target_width > width:
+            left_width = (target_width - width) / 2
+            right_width = target_width - left_width - width
+
+            right_mat = numpy.zeros((target_height, right_width)) + fill_value
+            left_mat = numpy.zeros((target_height, left_width)) + fill_value
+
+            cur_ragion = numpy.concatenate((left_mat, cur_ragion, right_mat), axis=1)
+        return cur_ragion
+
+class Ragions(object):
+    @staticmethod
+    def fill_to_same_size(ragions):
+        '''
+            Ragions.fill_to_same_size
+            Fill all ragions to the same size which is the largest in height and width.
+        '''
+        shapes = map(numpy.shape, ragions)
+        largest_height = max(map(operator.itemgetter(0), shapes))
+        largest_width = max(map(operator.itemgetter(1), shapes))
+        fill_func = lambda ragion: Ragion.fill(ragion, (largest_height, largest_width))
+        return map(fill_func, ragions)
+
+    @staticmethod
+    def join_same_size(ragions, count_in_row, init_value=BLACK):
+        '''
+            Ragions.join_same_size
+            Join all ragions to a big image.
+            The ragions must have same size.
+        '''
+        ragion_count = len(ragions)
+        # ragion_count.pp()
+        ragion_row_count = int(ragion_count / count_in_row) + 1
+        steps = 4
+        ragion_height, ragion_width = ragions[0].shape
+        # ragions[0].shape.pp()
+        width = count_in_row * ragion_width + (count_in_row + 1) * steps
+        height = ragion_row_count * ragion_height + (ragion_row_count + 1) * steps
+
+        pic_array = numpy.zeros((height, width), dtype=numpy.uint8) + init_value
+        # pic_array.shape.pp()
+        # show_pic(pic_array)
+
+        for i in range(ragion_row_count):
+            for j in range(count_in_row):
+                ragion_index = j+i * count_in_row
+                if ragion_index >= ragion_count:
+                    break
+                x_index = (i+1)*steps+i*ragion_height
+                y_index = (j+1)*steps+j*ragion_width
+                pic_array[x_index:x_index+ragion_height, y_index:y_index+ragion_width] = ragions[ragion_index]
+        return pic_array
+
+    @staticmethod
+    def show_same_size(ragions, count_in_row=9, init_value=BLACK):
+        '''
+            Ragions.show_same_size
+            Show the ragions which have the same size.
+        '''
+        pic_array = Ragions.join_same_size(ragions, count_in_row, init_value)
+        show_pic(pic_array)
+
+    @staticmethod
+    def show(ragions, count_in_row=9, init_value=BLACK):
+        '''
+            Ragions.show
+            Show the ragions which could have different size.
+        '''
+        same_size_ragions = Ragions.fill_to_same_size(ragions)
+        count_in_row = min(len(ragions), count_in_row)
+        Ragions.show_same_size(same_size_ragions, count_in_row, init_value)
+
+
+class Image(object):
+    '''
+        notice: in an image, using image[y,x] to get the value of point (x,y).
+        The order is reversed with point.
+    '''
+    @staticmethod
+    def centroid(the_image):
         height, width = the_image.shape
         ''' x, y'''
         return (width/2, height/2)
@@ -245,7 +314,8 @@ class Image(object):
 
     @staticmethod
     def save_to_txt(the_image, file_name):
-        return numpy.savetxt(the_image, file_name, fmt='%d', delimiter='')
+        return numpy.savetxt(file_name, the_image, fmt='%d', delimiter='')
+
 
     @staticmethod
     def clip_by_x_y_count(the_image, clip_x_count=2, clip_y_count=2):
@@ -324,108 +394,22 @@ class Image(object):
             cv2.circle(color_image,tuple(point),2,color,-1)
         Image.show(color_image)
 
+    @staticmethod
+    def show_rect(the_image, rect):
+        sub_image = Rect.get_ragion(rect, the_image)
+        show_pic(sub_image)
 
 
-def threshold_white_with_mean_percent(gray_pic, mean_percent=0.7):
-    return Image.threshold_white_with_mean_percent(gray_pic, mean_percent)
+    @staticmethod
+    def show_rects(the_image, rects, color=(0,255,255)):
+        contours = map(Rect.to_contour, rects)
+        Image.show_contours(the_image, contours, color)
 
-def find_contours(threshed_pic_array, filter_func = None, accuracy_percent_with_perimeter=0.01):
-    return Image.find_contours(threshed_pic_array, filter_func, accuracy_percent_with_perimeter)
-
-def clip_array_by_x_y_count(pic_array, clip_x_count=2, clip_y_count=2):
-    return Image.clip_by_x_y_count(pic_array, clip_x_count, clip_y_count)
-
-def clip_array_by_percent(pic_array, percent=0.1):
-    return Image.clip_by_percent(pic_array, percent)
-
-def clip_array_by_four_percent(pic_array, 
-        top_percent=0.1, bottom_percent=0.1, left_percent=0.1, right_percent=0.1):
-    return Image.clip_by_four_percent(pic_array, 
-        top_percent, bottom_percent, left_percent, right_percent)
-
-def save_binary_pic_txt(file_name, binary_pic):
-    return Image.save_to_txt(binary_pic, file_name)
+    @staticmethod
+    def show_rects_with_color(the_image, rects, color=(0,255,255)):
+        Image.show_rects(cv2.cvtColor(the_image, cv2.COLOR_GRAY2BGR), rects, color)
 
 
-def is_not_empty_pic(pic_array):
-    return Image.is_not_empty(pic_array)
-
-
-def cal_nonzero_rect(pic_array):
-    return Image.cal_nonzero_rect(pic_array)
-
-
-def cal_nonzero_rect_as_pic_ratio(pic_array):
-    return Image.cal_nonzero_rect_keeping_ratio(pic_array)
-
-
-
-def show_pic(the_image):
-    Image.show(the_image)
-
-def show_contours_in_pic(pic_array, contours, color=(0,255,255)):
-    Image.show_contours(pic_array, contours, color)
-
-def show_contours_in_color_pic(pic_array, contours, color=(0,255,255)):
-    Image.show_contours_with_color(pic_array, contours, color)
-
-def show_rects_in_pic(pic_array, rects, color=(0,255,255)):
-    contours = map(Rect.to_contour, rects)
-    show_contours_in_pic(pic_array, contours, color)
-
-def show_rects_in_color_pic(pic_array, rects, color=(0,255,255)):
-    show_rects_in_pic(cv2.cvtColor(pic_array, cv2.COLOR_GRAY2BGR), rects, color)
-
-def show_rect(pic_array, rect):
-    sub_pic_array = Rect.get_ragion(rect, pic_array)
-    show_pic(sub_pic_array)
-
-def show_points_in_color_pic(pic_array, points):
-    Image.show_points_with_color(pic_array, points)
-
-def show_same_size_ragions_as_pic(ragions, count_in_row=9, init_value=BLACK):
-    pic_array = join_ragions_as_pic(ragions, count_in_row, init_value)
-    show_pic(pic_array)
-
-def modify_rect_as_pic_ratio(rect, shape):
-    return Rect.modify_to_ratio(rect, shape)
-
-def join_ragions_as_pic(ragions, count_in_row, init_value=BLACK):
-    '''
-        The ragion must have same size.
-        for test
-    '''
-    ragion_count = len(ragions)
-    # ragion_count.pp()
-    ragion_row_count = int(ragion_count / count_in_row) + 1
-    steps = 4
-    ragion_height, ragion_width = ragions[0].shape
-    # ragions[0].shape.pp()
-    width = count_in_row * ragion_width + (count_in_row + 1) * steps
-    height = ragion_row_count * ragion_height + (ragion_row_count + 1) * steps
-
-    pic_array = numpy.zeros((height, width), dtype=numpy.uint8) + init_value
-    # pic_array.shape.pp()
-    # show_pic(pic_array)
-
-    for i in range(ragion_row_count):
-        for j in range(count_in_row):
-            ragion_index = j+i * count_in_row
-            if ragion_index >= ragion_count:
-                break
-            x_index = (i+1)*steps+i*ragion_height
-            y_index = (j+1)*steps+j*ragion_width
-            pic_array[x_index:x_index+ragion_height, y_index:y_index+ragion_width] = ragions[ragion_index]
-            # if ragion_index == 1:
-            #     aa = pic_array[x_index:x_index+ragion_height, y_index:y_index+ragion_width] 
-            #     aa.shape.pp()
-            #     ragions[ragion_index].shape.pp()
-            #     aa.pp()
-            #     ragions[ragion_index].pp()
-            #     # x_index.pp()
-            #     # y_index.pp()
-            #     show_pic(aa)
-    return pic_array
 
 ''' methods not using '''
 # def clip_array_by_fixed_size(pic_array, fixed_height=32, fixed_width=32, delta_start_y=3):
@@ -442,13 +426,15 @@ def join_ragions_as_pic(ragions, count_in_row, init_value=BLACK):
 if __name__ == '__main__':
     from minitest import *
 
+    inject(numpy.allclose, 'must_close')
+
     IMG_SIZE = 32
 
-    ORIGINAL_IMAGE_NAME = './images/antiqua1.png'
+    # ORIGINAL_IMAGE_NAME = './images/antiqua1.png'
+    ORIGINAL_IMAGE_NAME = '../../resource/example_pics/sample01.dataset.jpg'
+    small_number_path = '../../resource/test/small_number.dataset'
     gray_pic = cv2.imread(ORIGINAL_IMAGE_NAME, 0)
     color_pic = cv2.imread(ORIGINAL_IMAGE_NAME)
-
-    small_number_path = 'test_resources/small_number.dataset'
 
 
     def binary_number_to_lists(file_path):
@@ -460,8 +446,8 @@ if __name__ == '__main__':
     def list_to_image_array(the_list, shape=(IMG_SIZE,IMG_SIZE)):
         return numpy.array(the_list, numpy.uint8).reshape(shape)
 
-    with test("Image.center_point"):
-        Image.center_point(gray_pic).must_equal((247, 117))
+    with test("Image.centroid"):
+        Image.centroid(gray_pic).must_equal((368, 653))
 
     with test("Contour.get_rect_ragion"):
         contour = numpy.array([[[ 171,  21]],
@@ -483,34 +469,6 @@ if __name__ == '__main__':
         ''' uncomment the below, you can see the consequence in a picture. '''
         # show_pic(cur_area_pic1)    
 
-    with test("Rect.split_to_rects"):
-        contour = numpy.array(
-              [[[ 16, 139]],
-               [[ 16, 225]],
-               [[478, 225]],
-               [[478, 139]]])
-        ragion_rects = Rect.split_to_rects(cv2.boundingRect(contour), 10, 1)
-        ragion_contours = map(Rect.to_contour, ragion_rects)
-        ragion_contours.size().must_equal(10)
-        ''' uncomment the below, you can see the consequence in a picture. '''        
-        # show_contours_in_pic(color_pic, ragion_contours)
-        pass
-
-    with test("Rect.to_contour"):
-        contour = numpy.array([[[ 18,  21]],
-                               [[ 18, 216]],
-                               [[175, 216]],
-                               [[175,  21]]])
-        rect = (18, 21, 158, 196)
-        Rect.to_contour(rect).must_equal(contour, numpy.allclose)
-
-    with test("Rect.vertices"):
-        rect = (18, 21, 158, 196)
-        Rect.vertices(rect).must_equal(
-            numpy.array([  [ 18,  21],
-                           [ 18, 216],
-                           [175, 216],
-                           [175,  21]]), numpy.allclose)
 
 
     with test("Image.clip_by_x_y_count"):
@@ -552,10 +510,28 @@ if __name__ == '__main__':
         # sub_image = Rect.get_ragion(cur_rect, image_array)
         # sub_image.pp()
 
-    with test("Rect.modify_to_ratio"):
-        cur_rect = (10, 9, 12, 18)
-        Rect.modify_to_ratio(cur_rect, (IMG_SIZE, IMG_SIZE)).must_equal(
-            (7, 9, 18, 18))
+    with test("Ragion.fill"):
+        the_ragion = numpy.ones((3,4))
+        Ragion.fill(the_ragion, (6,6)).must_close(
+            numpy.array(  [[ 0.,  0.,  0.,  0.,  0.,  0.],
+                           [ 0.,  1.,  1.,  1.,  1.,  0.],
+                           [ 0.,  1.,  1.,  1.,  1.,  0.],
+                           [ 0.,  1.,  1.,  1.,  1.,  0.],
+                           [ 0.,  0.,  0.,  0.,  0.,  0.],
+                           [ 0.,  0.,  0.,  0.,  0.,  0.]]))
+
+    with test("Ragions.fill_to_same_size"):
+        ragions = (numpy.ones((3,2)), numpy.ones((2,1)), numpy.ones((2,4)))
+        Ragions.fill_to_same_size(ragions).must_close(
+            [numpy.array([[ 0.,  1.,  1.,  0.],
+                   [ 0.,  1.,  1.,  0.],
+                   [ 0.,  1.,  1.,  0.]]),
+             numpy.array([[ 0.,  1.,  0.,  0.],
+                   [ 0.,  1.,  0.,  0.],
+                   [ 0.,  0.,  0.,  0.]]),
+             numpy.array([[ 1.,  1.,  1.,  1.],
+                   [ 1.,  1.,  1.,  1.],
+                   [ 0.,  0.,  0.,  0.]])])
 
     with test("Image.cal_nonzero_rect_keeping_ratio"):
         image_list = binary_number_to_lists(small_number_path)
@@ -605,13 +581,13 @@ if __name__ == '__main__':
     #     draw_line(the_image, line)
         # Image.show(the_image)
 
-    with test("Quadrilateral.center"):
+    with test("Quadrilateral.centroid"):
         contour = numpy.array(
               [[[384, 225]],
                [[ 42, 249]],
                [[ 49, 583]],
                [[384, 569]]], dtype=numpy.int32)
-        Quadrilateral.center(contour).must_equal(
+        Quadrilateral.centroid(contour).must_equal(
             numpy.array(
               [ 214.75,  406.5 ]), numpy.allclose)
 
@@ -631,8 +607,9 @@ if __name__ == '__main__':
                [[214, 349]]]), numpy.allclose)
 
         ''' show '''
-        # the_image = Image.generate_mask((600, 400))
+        the_image = Image.generate_mask((600, 400))
         # Image.show_contours_with_color(the_image, contours)
+        # contours[1:2].pp()
         # Image.show_contours_with_color(the_image, contours[1:2])
 
     with test("Quadrilateral.enlarge"):
@@ -728,3 +705,7 @@ if __name__ == '__main__':
     #     # show_pic(resized_image)
 
 
+        '''
+            Ragions.show_same_size
+            Show the ragions which have the same size.
+        '''
