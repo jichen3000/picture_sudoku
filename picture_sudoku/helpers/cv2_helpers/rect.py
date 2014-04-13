@@ -116,6 +116,8 @@ class Rect(object):
 if __name__ == '__main__':
     from minitest import *
 
+    inject(numpy.allclose, 'must_close')
+
     with test("Rect.cal_center_rect"):
         centroid = (16,13)
         Rect.cal_center_rect(centroid, 4, 5, 6, 7).must_equal((10, 9, 14, 10))
@@ -144,18 +146,23 @@ if __name__ == '__main__':
                                [[175, 216]],
                                [[175,  21]]])
         rect = (18, 21, 158, 196)
-        Rect.to_contour(rect).must_equal(contour, numpy.allclose)
+        Rect.to_contour(rect).must_close(contour)
 
     with test("Rect.vertices"):
         rect = (18, 21, 158, 196)
-        Rect.vertices(rect).must_equal(
+        Rect.vertices(rect).must_close(
             numpy.array([  [ 18,  21],
                            [ 18, 216],
                            [175, 216],
-                           [175,  21]]), numpy.allclose)
+                           [175,  21]]))
 
     with test("Rect.has_nonzero"):
         zeros_arr = numpy.zeros((9,9))
         zeros_arr[5,5] = 1
         Rect.has_nonzero((1,5, 6, 1), zeros_arr).must_true()
         Rect.has_nonzero((1,6, 6, 1), zeros_arr).must_false()
+
+    with test("Rect.adjust_to_minimum"):
+        rect = (153, 13, 668, 628)
+        Rect.adjust_to_minimum(rect).must_equal((153, 13, 628, 628))
+
