@@ -5,13 +5,13 @@ import operator
 from picture_sudoku.helpers import numpy_helper
 from picture_sudoku.helpers import list_helper
 
-from picture_sudoku.helpers.cv2_helpers.image import Image
-from picture_sudoku.helpers.cv2_helpers.ragion import Ragion
-from picture_sudoku.helpers.cv2_helpers.ragion import Ragions
-from picture_sudoku.helpers.cv2_helpers.rect import Rect
-from picture_sudoku.helpers.cv2_helpers.contour import Contour
-from picture_sudoku.helpers.cv2_helpers.quadrilateral import Quadrilateral
-from picture_sudoku.helpers.cv2_helpers.points import Points
+from picture_sudoku.cv2_helpers.image import Image
+from picture_sudoku.cv2_helpers.ragion import Ragion
+from picture_sudoku.cv2_helpers.ragion import Ragions
+from picture_sudoku.cv2_helpers.rect import Rect
+from picture_sudoku.cv2_helpers.contour import Contour
+from picture_sudoku.cv2_helpers.quadrilateral import Quadrilateral
+from picture_sudoku.cv2_helpers.points import Points
 
 
 from polar_lines import PolarLines
@@ -193,7 +193,7 @@ def main(image_path):
     vertical_lines = find_vertical_lines(square_ragion)
     horizontal_lines = find_horizontal_lines(square_ragion)
 
-    Display.polar_lines(square_ragion, vertical_lines+horizontal_lines)
+    # Display.polar_lines(square_ragion, vertical_lines+horizontal_lines)
 
     '''sometimes, the point may less than 0'''
     all_points = tuple(PolarLines.cal_intersection(v_line, h_line) 
@@ -205,7 +205,7 @@ def main(image_path):
     all_points = numpy.array(all_points, dtype=numpy.int32)
     # len(all_points).ppl()
     # all_points.ppl()
-    Display.points(square_ragion, all_points)
+    # Display.points(square_ragion, all_points)
 
     # v_line = vertical_lines[3]
     # h_line = horizontal_lines[2]
@@ -257,10 +257,12 @@ def main(image_path):
     # nonzero_number_ragions = tuple(ragion if not numpy_helper.is_array_none(ragion) else numpy.zeros((1,1)) 
     #         for ragion in nonzero_number_ragions)
 
-    # n_1 = get_nonzero_ragion(number_binary_ragions[4])
+    # n_1 = get_nonzero_ragion(number_binary_ragions[31])
+    # save_dataset(number_binary_ragions[31], 'sample_14_07.dataset')
+    # save_dataset(n_1, 'sample_14_07_nonzeros.dataset')
 
-    # Image.save_to_txt(numpy_helper.transfer_values_quickly(number_binary_ragions[4],{255:1}),'original_06.txt')
-    # Image.save_to_txt(numpy_helper.transfer_values_quickly(n_1,{255:1}), "number_06.txt")
+    # Image.save_to_txt(numpy_helper.transfer_values_quickly(number_binary_ragions[1],{255:1}),'original_06.dataset')
+    # Image.save_to_txt(numpy_helper.transfer_values_quickly(n_1,{255:1}), "number_06.dataset")
     # n_1.ppl()
     # number_binary_ragions[1].ppl()
     # rect_1 = (11, 8, 9, 14)
@@ -286,15 +288,23 @@ def get_nonzero_ragion(the_ragion):
 
 if __name__ == '__main__':
     from minitest import *
-    from picture_sudoku.helpers.cv2_helpers.display import Display
+    from picture_sudoku.cv2_helpers.display import Display
 
     inject_customized_must_method(numpy.allclose, 'must_close')
 
-    image_path = '../../resource/example_pics/sample01.dataset.jpg'
+    def save_dataset(the_image, file_name):
+        file_path = '../../resource/test/' + file_name
+        transfered_image = numpy_helper.transfer_values_quickly(the_image,{255:1})
+        return Image.save_to_txt(transfered_image,file_path)
+
+
+    image_path = '../../resource/example_pics/sample14.dataset.jpg'
     main(image_path)
     # for i in range(1,15):
     #     pic_file_path = '../../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.jpg'
     #     pic_file_path.ppl()
     #     main(pic_file_path)
+
+
 
 

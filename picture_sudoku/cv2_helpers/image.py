@@ -107,31 +107,41 @@ class Image(object):
         not_use, threshed_image = cv2.threshold(gray_image,threshold_value,WHITE,cv2.THRESH_BINARY_INV)
         return threshed_image
 
+    @staticmethod
+    def read_from_number_file(file_path):
+        line_list_list = []
+        with open(file_path) as data_file:
+            for line in data_file:
+                striped_line = line.strip()
+                if len(striped_line):
+                    line_list = [int(cur_str) for cur_str in striped_line]
+                    line_list_list.append(line_list)
+        height = len(line_list_list)
+        width = len(line_list_list[0])
+        return numpy.array(line_list_list, numpy.uint8).reshape((height, width))
 
 if __name__ == '__main__':
     from minitest import *
 
-    IMG_SIZE = 32
+    from display import Display
+    from picture_sudoku.helpers import numpy_helper
 
-    ORIGINAL_IMAGE_NAME = '../../../resource/example_pics/sample01.dataset.jpg'
-    small_number_path = '../../../resource/test/small_number.dataset'
+
+    ORIGINAL_IMAGE_NAME = '../../resource/example_pics/sample01.dataset.jpg'
     gray_pic = cv2.imread(ORIGINAL_IMAGE_NAME, 0)
     color_pic = cv2.imread(ORIGINAL_IMAGE_NAME)
 
+    small_number_path = '../../resource/test/small_number.dataset'
+    small_image = Image.read_from_number_file(small_number_path)
 
-    def binary_number_to_lists(file_path):
-        with open(file_path) as data_file:
-            result = [int(line[index]) for line in data_file 
-                for index in range(IMG_SIZE)]
-        return result
 
-    def list_to_image_array(the_list, shape=(IMG_SIZE,IMG_SIZE)):
-        return numpy.array(the_list, numpy.uint8).reshape(shape)
+
+    with test("Image.read_from_number_file"):
+        small_image.shape.must_equal((32,32))
+        numpy.count_nonzero(small_image).must_equal(110)
 
     with test("Image.centroid"):
         Image.centroid(gray_pic).must_equal((368, 653))
-
-
 
     with test("Image.clip_by_x_y_count"):
         arr = numpy.arange(81).reshape((9,9))
@@ -151,32 +161,23 @@ if __name__ == '__main__':
                            [47, 48, 49, 50, 51],
                            [56, 57, 58, 59, 60]]), numpy.allclose)
 
-    with test("list_to_image_array"):
-        image_list = binary_number_to_lists(small_number_path)
-        image_array = list_to_image_array(image_list)
-        numpy.count_nonzero(image_array).must_equal(110)
-        image_array.shape.must_equal((IMG_SIZE,IMG_SIZE))
 
     with test("Image.cal_nonzero_rect"):
-        image_list = binary_number_to_lists(small_number_path)
-        image_array = list_to_image_array(image_list)
-        cur_rect = Image.cal_nonzero_rect(image_array)
+        cur_rect = Image.cal_nonzero_rect(small_image)
         cur_rect.must_equal((10, 9, 12, 18))
 
         ''' uncomment the below, you can see the consequence in a picture. '''
-        # cur_contour = rect_to_contour(cur_rect)
-        # transfer_values(image_array, {1:255, 0:0})
-        # show_contours_in_pic(image_array, [cur_contour], 255)
+        # cur_contour = Rect.to_contour(cur_rect)
+        # numpy_helper.transfer_values_quickly(small_image, {1:255, 0:0})
+        # Display.contours(small_image, [cur_contour], 255)
 
         ''' uncomment the below, you can see the print consequence. '''
-        # sub_image = Rect.get_ragion(cur_rect, image_array)
+        # sub_image = Rect.get_ragion(cur_rect, small_image)
         # sub_image.pp()
 
 
     with test("Image.cal_nonzero_rect_keeping_ratio"):
-        image_list = binary_number_to_lists(small_number_path)
-        image_array = list_to_image_array(image_list)
-        Image.cal_nonzero_rect_keeping_ratio(image_array).must_equal((7, 9, 18, 18))
+        Image.cal_nonzero_rect_keeping_ratio(small_image).must_equal((7, 9, 18, 18))
 
     with test("Image.is_not_empty"):
         arr = numpy.zeros((3,3))
@@ -194,5 +195,6 @@ if __name__ == '__main__':
                [[ 49, 583]],
                [[384, 569]]], dtype=numpy.int32)
         Image.fill_contours(mask, [contour])
+
 
 

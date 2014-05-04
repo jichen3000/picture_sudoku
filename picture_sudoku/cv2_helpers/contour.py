@@ -39,7 +39,7 @@ if __name__ == '__main__':
     from minitest import *
     from image import Image
 
-    ORIGINAL_IMAGE_NAME = '../../../resource/example_pics/sample01.dataset.jpg'
+    ORIGINAL_IMAGE_NAME = '../../resource/example_pics/sample01.dataset.jpg'
     gray_image = cv2.imread(ORIGINAL_IMAGE_NAME, 0)
 
     with test("Contour.mass_center"):
