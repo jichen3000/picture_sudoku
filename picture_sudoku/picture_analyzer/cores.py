@@ -70,7 +70,6 @@ def center_rect_enlarge_search(the_ragion):
             top_nonzero = Rect.has_nonzero((left_x, top_y, right_x-left_x+1, 1),the_ragion)
             if top_nonzero:
                 top_y -= 1
-                if 
             if top_y <= 0:
                 top_nonzero = False
                 top_y = -1
