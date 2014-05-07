@@ -115,19 +115,21 @@ class Rect(object):
 
 if __name__ == '__main__':
     from minitest import *
+    from display import Display
+    from image import Image
 
     inject(numpy.allclose, 'must_close')
 
-    with test("Rect.cal_center_rect"):
+    with test(Rect.cal_center_rect):
         centroid = (16,13)
         Rect.cal_center_rect(centroid, 4, 5, 6, 7).must_equal((10, 9, 14, 10))
         
-    with test("Rect.modify_to_ratio"):
+    with test(Rect.modify_to_ratio):
         cur_rect = (10, 9, 12, 18)
         Rect.modify_to_ratio(cur_rect, (32, 32)).must_equal(
             (7, 9, 18, 18))
 
-    with test("Rect.split_to_rects"):
+    with test(Rect.split_to_rects):
         contour = numpy.array(
               [[[ 16, 139]],
                [[ 16, 225]],
@@ -137,10 +139,9 @@ if __name__ == '__main__':
         ragion_contours = map(Rect.to_contour, ragion_rects)
         ragion_contours.size().must_equal(10)
         ''' uncomment the below, you can see the consequence in a picture. '''        
-        # show_contours_in_pic(color_pic, ragion_contours)
-        pass
+        # Display.contours(Image.generate_mask((600, 600)), ragion_contours)
 
-    with test("Rect.to_contour"):
+    with test(Rect.to_contour):
         contour = numpy.array([[[ 18,  21]],
                                [[ 18, 216]],
                                [[175, 216]],
@@ -148,7 +149,7 @@ if __name__ == '__main__':
         rect = (18, 21, 158, 196)
         Rect.to_contour(rect).must_close(contour)
 
-    with test("Rect.vertices"):
+    with test(Rect.vertices):
         rect = (18, 21, 158, 196)
         Rect.vertices(rect).must_close(
             numpy.array([  [ 18,  21],
@@ -156,13 +157,13 @@ if __name__ == '__main__':
                            [175, 216],
                            [175,  21]]))
 
-    with test("Rect.has_nonzero"):
+    with test(Rect.has_nonzero):
         zeros_arr = numpy.zeros((9,9))
         zeros_arr[5,5] = 1
         Rect.has_nonzero((1,5, 6, 1), zeros_arr).must_true()
         Rect.has_nonzero((1,6, 6, 1), zeros_arr).must_false()
 
-    with test("Rect.adjust_to_minimum"):
+    with test(Rect.adjust_to_minimum):
         rect = (153, 13, 668, 628)
         Rect.adjust_to_minimum(rect).must_equal((153, 13, 628, 628))
 

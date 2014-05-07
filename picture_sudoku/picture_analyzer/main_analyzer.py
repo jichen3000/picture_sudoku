@@ -237,7 +237,7 @@ def main(image_path):
     #     ragion.shape.ppl()
     # get_nonzero_ragion(number_binary_ragions[0]).ppl()
 
-    nonzero_number_rects = map(cores.get_nonzero_rect, number_binary_ragions)
+    nonzero_number_rects = map(cores.analyze_center_nonzero_rect, number_binary_ragions)
     nonzero_number_rects = [r for r in nonzero_number_rects if r]
     # nonzero_number_rects.size().ppl()
 
@@ -276,7 +276,7 @@ def main(image_path):
     # index_ragion_list = [(i, ragion) for i, ragion in index_ragion_list if not is_array_none(ragion)]
 
 def get_nonzero_ragion(the_ragion):
-    nonzero_rect = cores.get_nonzero_rect(the_ragion)
+    nonzero_rect = cores.analyze_center_nonzero_rect(the_ragion)
     if nonzero_rect:
         return Rect.get_ragion(nonzero_rect, the_ragion)
     else:
