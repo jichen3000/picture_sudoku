@@ -77,14 +77,6 @@ class PolarLines(object):
         return all_lines
 
     @staticmethod
-    def cal_all_lines(lines, accuracy_pixs, line_count):
-        catalogued_lines = PolarLines.catalogue_lines(lines, accuracy_pixs)
-        mean_lines = PolarLines.cal_mean_lines(catalogued_lines)
-        all_lines = PolarLines.fill_lost_lines(mean_lines, line_count)
-        return all_lines
-
-
-    @staticmethod
     def cal_intersection(line1, line2):
         rho1, theta1 = line1
         rho2, theta2 = line2

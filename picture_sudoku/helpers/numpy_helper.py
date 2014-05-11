@@ -7,8 +7,8 @@ def transfer_values(arr, rule_hash):
     # result = arr.copy()
     result = arr
     for (i, j), value in numpy.ndenumerate(result):
-        # if value in rule_hash.keys():
-        result[i,j] = rule_hash[value]
+        if value in rule_hash.keys():
+            result[i,j] = rule_hash[value]
     return result
 
 def transfer_values_quickly(arr, rule_hash):
@@ -28,6 +28,12 @@ def transfer_values_quickly(arr, rule_hash):
         result[result==key]=value
         handled_values.append(value)
     return result
+
+def transfer_1to255(arr):
+    return transfer_values_quickly(arr, {1:255})
+
+def transfer_255to1(arr):
+    return transfer_values_quickly(arr, {255:1})
 
 def is_array_none(the_array):
     return numpy.all(the_array, None)==None

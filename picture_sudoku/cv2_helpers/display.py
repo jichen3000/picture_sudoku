@@ -21,6 +21,17 @@ class Display(object):
         cv2.destroyAllWindows()
 
     @staticmethod
+    def images(images, image_name='image'):
+        dx = 0
+        for index, cur_image in enumerate(images):
+            window_name = image_name+str(index+1)
+            cv2.imshow(window_name, cur_image)
+            cv2.moveWindow(window_name, dx, 0)
+            dx = cur_image.shape[1]
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    @staticmethod
     def contours(the_image, contours, color=(0,255,255)):
         color_image = cv2.cvtColor(the_image, cv2.COLOR_GRAY2BGR)
         cv2.drawContours(color_image, contours, -1, color ,1)

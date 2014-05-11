@@ -120,6 +120,10 @@ class Image(object):
         width = len(line_list_list[0])
         return numpy.array(line_list_list, numpy.uint8).reshape((height, width))
 
+    @staticmethod
+    def colorize(the_image):
+        return cv2.cvtColor(the_image, cv2.COLOR_GRAY2BGR)
+
 if __name__ == '__main__':
     from minitest import *
 

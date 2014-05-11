@@ -13,9 +13,9 @@ from picture_sudoku.cv2_helpers.rect import Rect
 # from picture_sudoku.cv2_helpers.quadrilateral import Quadrilateral
 # from picture_sudoku.cv2_helpers.points import Points
 
-__all__ = ['analyze_center_nonzero_rect']
+__all__ = ['analyze_from_center']
 
-def analyze_center_nonzero_rect(the_ragion):
+def analyze_from_center(the_ragion):
     first_rect = generate_first_rect(the_ragion)
     nonzeros = the_ragion.nonzero()
 
@@ -24,10 +24,15 @@ def analyze_center_nonzero_rect(the_ragion):
         return None
 
     nonzero_dicts = organize_nonzeros(nonzeros)
-    if is_on_rect_borders(nonzero_dicts, first_rect):
-        real_rect = enlarge_search_nonzero_rect(nonzero_dicts, first_rect)
-    else:
-        real_rect = cal_smallest_rect(nonzeros_in_rect)
+    real_rect = cal_smallest_rect(nonzeros_in_rect)
+    if is_on_rect_borders(nonzero_dicts, real_rect):
+        real_rect = enlarge_search_nonzero_rect(nonzero_dicts, real_rect)
+        # sometime, the rect will just be the whole ragion,
+        # in this case, it will be considered as None
+        if real_rect[0] < 0 or real_rect[1] < 0:
+            return None
+    # else:
+    #     real_rect = cal_smallest_rect(nonzeros_in_rect)
     return real_rect
 
 def has_enough_nonzeros(nonzeros, the_shape):
@@ -200,29 +205,45 @@ if __name__ == '__main__':
 
     inject(numpy.allclose, 'must_close')
 
-    image_14_07_path = '../../resource/test/sample_14_07.dataset'
+    test_image_path = '../../resource/test/'
+    image_14_07_path = test_image_path+'sample_14_07.dataset'
     image_14_07 = Image.read_from_number_file(image_14_07_path)
-    image_14_07_255 = numpy_helper.transfer_values_quickly(image_14_07, {1:255, 0:0})
+    image_14_07_255 = numpy_helper.transfer_values_quickly(image_14_07, {1:255})
 
-
-    with test(analyze_center_nonzero_rect):
-        rect_14_07 = analyze_center_nonzero_rect(image_14_07)
+    with test(analyze_from_center):
+        rect_14_07 = analyze_from_center(image_14_07)
         rect_14_07.must_equal((14, 10, 28, 41))
         # Display.rect(image_14_07_255, rect_14_07)
 
-        image_01_03_path = '../../resource/test/sample_01_03.dataset'
+        image_01_03_path = test_image_path+'sample_01_03.dataset'
         image_01_03 = Image.read_from_number_file(image_01_03_path)
-        image_01_03_255 = numpy_helper.transfer_values_quickly(image_01_03, {1:255, 0:0})
-        rect_01_03 = analyze_center_nonzero_rect(image_01_03)
-        rect_01_03.must_equal((27, 26, 12, 17))
+        image_01_03_255 = numpy_helper.transfer_values_quickly(image_01_03, {1:255})
+        rect_01_03 = analyze_from_center(image_01_03)
+        rect_01_03.must_equal((26, 25, 14, 19))
         # Display.rect(image_01_03_255, rect_01_03)
 
-        image_02_null_path = '../../resource/test/sample_02_null.dataset'
+        image_02_null_path = test_image_path+'sample_02_null.dataset'
         image_02_null = Image.read_from_number_file(image_02_null_path)
-        image_02_null_255 = numpy_helper.transfer_values_quickly(image_02_null, {1:255, 0:0})
-        rect_02_null = analyze_center_nonzero_rect(image_02_null)
+        image_02_null_255 = numpy_helper.transfer_values_quickly(image_02_null, {1:255})
+        rect_02_null = analyze_from_center(image_02_null)
         rect_02_null.must_equal(None)
         # Display.image(image_02_null_255)
+
+        image_07_01_path = test_image_path+'sample_07_01.dataset'
+        image_07_01 = Image.read_from_number_file(image_07_01_path)
+        image_07_01_255 = numpy_helper.transfer_values_quickly(image_07_01, {1:255})
+        rect_07_01 = analyze_from_center(image_07_01)
+        rect_07_01.must_equal(None)
+        # Display.image(image_07_01_255)
+
+        image_13_05_path = test_image_path+'sample_13_05.dataset'
+        image_13_05 = Image.read_from_number_file(image_13_05_path)
+        image_13_05_255 = numpy_helper.transfer_values_quickly(image_13_05, {1:255})
+        rect_13_05 = analyze_from_center(image_13_05)
+        rect_13_05.must_equal((16, 16, 18, 25))
+        # Display.image(image_13_05_255)
+        # Display.rect(image_13_05_255, rect_13_05)
+
 
     with test(has_enough_nonzeros):
         first_rect = generate_first_rect(image_14_07)

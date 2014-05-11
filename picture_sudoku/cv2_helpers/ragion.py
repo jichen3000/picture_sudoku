@@ -43,6 +43,11 @@ class Ragion(object):
 
 class Ragions(object):
     @staticmethod
+    def join(ragions, count_in_row=9, init_value=BLACK):
+        return Ragions.join_same_size(
+            Ragions.fill_to_same_size(ragions),count_in_row, init_value)
+
+    @staticmethod
     def fill_to_same_size(ragions):
         '''
             Ragions.fill_to_same_size
@@ -55,7 +60,7 @@ class Ragions(object):
         return map(fill_func, ragions)
 
     @staticmethod
-    def join_same_size(ragions, count_in_row, init_value=BLACK):
+    def join_same_size(ragions, count_in_row=9, init_value=BLACK):
         '''
             Ragions.join_same_size
             Join all ragions to a big image.

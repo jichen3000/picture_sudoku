@@ -7,9 +7,7 @@ import os
 import numpy
 
 from picture_sudoku.helpers import json_helper
-
-
-import rbf_smo
+from rbf_smo import Smo
 
 IMG_SIZE = 32
 
@@ -70,7 +68,7 @@ class MultipleSvm(object):
 
         return self
 
-    def normal_classify(self, row_matrix):
+    def normal_classify(self, row_matrix, with_order_labes=False):
         '''
             It's the normal classify, it will take more times ((len(labels)-1)/2) than the dag, 
             but the answer almost equal with dag.
@@ -79,10 +77,12 @@ class MultipleSvm(object):
         '''
         occurence_hash = { classifying_key:classifying_object.classify(row_matrix)
                 for classifying_key, classifying_object in self.classifying_hash.items()}
-        return most_common(occurence_hash.values()), occurence_hash
+        if with_order_labes:
+            return most_common(occurence_hash.values()), occurence_hash
+        return most_common(occurence_hash.values())
 
 
-    def dag_classify(self, row_matrix):
+    def dag_classify(self, row_matrix, with_order_labes=False):
         '''
             Direct Acyclic Graph, DAG will let classify more efficient.
             The classify times are only the length of labels.
@@ -97,7 +97,9 @@ class MultipleSvm(object):
             predict_label = self.classifying_hash[classifying_key].classify(row_matrix)
             order_labels.append([(predict_label,)]+list(classifying_key))
 
-        return predict_label, order_labels
+        if with_order_labes:
+            return predict_label, order_labels
+        return predict_label
 
     def __package_info(self, error_count, row_count):
         return {'error_ratio %':round(float(error_count)/row_count * 100, 2),
@@ -122,7 +124,7 @@ class MultipleSvm(object):
 
             # if error_count > 40:
             #     break
-        result_list.pp()
+        # result_list.ppl()
 
         self.last_test_info = self.__package_info(error_count, row_count)
         return self.last_test_info
@@ -159,10 +161,11 @@ class MultipleSvm(object):
             file_prefix = self.gen_prefix_from_list(classifying_key)
             transfer_hash = self.gen_binary_transfer_hash(classifying_key)
 
-            smo = self.binary_class.load_variables(data_path, file_prefix)
-            self.classifying_hash[classifying_key]=smo
+            self.classifying_hash[classifying_key] = self.binary_class.load_variables(
+                data_path, file_prefix)
 
         return self
+
 
     @classmethod
     def train_and_save_variables(cls, binary_class, data_matrix_hash,
@@ -233,34 +236,51 @@ def get_dataset_matrix_hash(the_path, start_with_numbers):
 if __name__ == '__main__':
     from minitest import *
 
-    font_result_path = '../../resource/digit_recognition/font_dataset'
-    hand_result_path = '../../resource/digit_recognition/hand_dataset'
+    font_result_path = '../../resource/digit_recognition/font_training_result'
+    hand_result_path = '../../resource/digit_recognition/hand_training_result'
 
-    font_training_path = '../../../codes/python/projects/font_number_binary/number_images'
+    # font_training_path = '../../../codes/python/projects/font_number_binary/number_images'
+    font_training_path = '../../other_resource/font_training'
 
-    hand_training_path = '../../../codes/python/ml/k_nearest_neighbours/training_digits'
-    hand_testing_path = '../../../codes/python/ml/k_nearest_neighbours/test_digits'
+    # hand_training_path = '../../../codes/python/ml/k_nearest_neighbours/training_digits'
+    # hand_testing_path = '../../../codes/python/ml/k_nearest_neighbours/test_digits'
+    hand_training_path = '../../other_resource/hand_training'
+    hand_testing_path = '../../other_resource/hand_testing'
+
+    def show_number_matrix(number_matrix):
+        from picture_sudoku.helpers import numpy_helper
+        from picture_sudoku.cv2_helpers.display import Display
+        from picture_sudoku.cv2_helpers.image import Image
+        binary_number_image = number_matrix.reshape((IMG_SIZE, IMG_SIZE))
+        number_image = numpy_helper.transfer_values_quickly(binary_number_image, {1:255})
+        number_image = numpy.array(number_image, dtype=numpy.uint8)
+        # Image.save_to_txt(number_image,'test1.dataset')
+        Display.image(number_image)
 
     def test_multi():
         arg_exp = 20
 
         # dataset_matrix_hash = get_dataset_matrix_hash(training_pic_path, range(2))
-        # dataset_matrix_hash = get_dataset_matrix_hash(font_training_path, range(10))
+        dataset_matrix_hash = get_dataset_matrix_hash(font_training_path, range(10))
         # dataset_matrix_hash = get_dataset_matrix_hash(hand_training_path, range(10))
         # dataset_matrix_hash = get_dataset_matrix_hash(training_pic_path, (9,))
         # dataset_matrix_hash.pp()
 
-        # mb = MultipleSvm.train_and_save_variables(rbf_smo.Smo, dataset_matrix_hash, 200, 0.0001, 1000, arg_exp)
-        # mb = MultipleSvm.load_variables(rbf_smo.Smo, 'font_dataset')
-        mb = MultipleSvm.load_variables(rbf_smo.Smo, hand_result_path)
-        # mb.classify(dataset_matrix_hash[9][0]).pp()
+        mb = MultipleSvm.train_and_save_variables(Smo, dataset_matrix_hash, 200, 0.0001, 1000, arg_exp, font_result_path)
+        # mb = MultipleSvm.load_variables(Smo, 'font_dataset')
+        # mb = MultipleSvm.load_variables(Smo, hand_result_path)
+
+        # dataset_matrix_hash[9][0].shape.ppl()
+        # mb.dag_classify(dataset_matrix_hash[9][0]).ppl()
+        # show_number_matrix(dataset_matrix_hash[9][0])
         # mb.normal_classify(dataset_matrix_hash[9][0]).pp()
 
-        data_matrix,label_matrix = load_data_from_images_with_nums(hand_testing_path, range(10))
-        mb.test(data_matrix,label_matrix).pp()
+        # data_matrix,label_matrix = load_data_from_images_with_nums(hand_testing_path, range(10))
+        # mb.test(data_matrix,label_matrix).pp()
         # training_digits
         # {'error_count': 38, 'error_ratio %': 4.02, 'row_count': 946}
         pass
+
 
     with test("test_multi"):
         test_multi()
