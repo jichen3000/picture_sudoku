@@ -1,0 +1,60 @@
+.cell{
+  width: 35px;
+  height: 35px;
+  text-align: center;
+  line-height: 35px;
+  background-color: #F7F7F9;
+  float: left;
+  border-color: #DDD;
+  font-size: 20px;
+  font-family: Arial, sans-serif;
+}
+.cell.answered{
+  color: blue;
+}
+.cell.duplicated{
+  color: red;
+}
+.cell.fix{
+  /*font-weight: bold;*/
+}
+.cell.hover{
+  background-color: #BEBEC5;
+}
+.group{
+  width: 107px;      
+  float: left;
+}
+.border{
+  border-style: solid;
+  border-width: 1px;        
+}
+#sudoku-99{
+  width: 323px;
+  height: 323px;
+}
+.container{
+  width: 724px;
+}
+#choose-form{
+  background-color: #F7F7F9;
+}
+.atv {
+  color: #D14;
+}
+#values-count{
+  font-size: 13px;
+}
+#choose-value-dialog{
+  /*width: auto;*/
+}
+#choose-value-dialog-content{
+  width: 149px;
+  margin: 0px;
+}
+.margin-zero{
+  margin: 0px;
+}
+#choose-buttons{
+  margin-top: 0px;
+}

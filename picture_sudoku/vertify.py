@@ -19,7 +19,7 @@ from picture_sudoku.digit_recognition.rbf_smo import Smo
 from picture_sudoku.helpers import numpy_helper
 from picture_sudoku.helpers import list_helper
 
-import picture_sudoku.main as sudoku_main
+from picture_sudoku import main_sudoku
 
 SUDOKU_SIZE = main_analyzer.SUDOKU_SIZE
 
@@ -89,14 +89,6 @@ def gen_pic_test_data():
 #     transfer_str('812, 967, 78, 257, , 396, 64, 178, 435').pl()
 
 
-def get_digits(image_path, som_svm):
-    number_indexs, number_ragions = main_analyzer.extract_number_ragions(image_path)
-    # show_number_ragions(number_ragions)
-    adjusted_number_ragions = map(adjust_number_ragion, number_ragions)
-    number_matrixs = map(sudoku_main.transfer_to_digit_matrix, adjusted_number_ragions)
-    digits = map(som_svm.dag_classify, number_matrixs)
-    digits = tuple(digits)
-    return number_indexs, digits, number_ragions
 
 def print_and_get_difference(actual, expected, image_index):
     print 'vertify no: %d' % (image_index) 
@@ -212,21 +204,13 @@ def digit_recognize():
     file_path = '../resource/svm_wrong_digits/pic08_no04_real8_cal3.dataset'
     number_ragion = numpy.mat(Image.read_from_number_file(file_path))
     transfered_ragion = numpy_helper.transfer_1to255(number_ragion)
-    # adjusted_ragion = adjust_number_ragion(transfered_ragion)
+    # adjusted_ragion = main_sudoku.adjust_number_ragion(transfered_ragion)
     adjusted_ragion = adjust_number_ragion2(transfered_ragion)
     # adjusted_ragion = transfered_ragion
     Display.ragions([transfered_ragion, adjusted_ragion])
     adjusted_ragion = numpy_helper.transfer_255to1(adjusted_ragion)
-    number_matrix = sudoku_main.transfer_to_digit_matrix(adjusted_ragion)
+    number_matrix = main_sudoku.transfer_to_digit_matrix(adjusted_ragion)
     mb.dag_classify(number_matrix).ppl()
-
-def adjust_number_ragion(the_image):
-    # element_value: {0: 'Rect', 1: 'Cross', 2: 'Ellipse'}
-    element_value = 1
-    kernel_size_value = 2*1+1
-    kernel = cv2.getStructuringElement(element_value, (kernel_size_value, kernel_size_value))
-
-    return cv2.dilate(the_image, kernel)
 
 def adjust_number_ragion2(the_image):
     # element_value: {0: 'Rect', 1: 'Cross', 2: 'Ellipse'}
@@ -247,18 +231,18 @@ def vertify_all_pics():
     pic_data = gen_pic_test_data()
 
     # hand_result_path = '../resource/digit_recognition/hand_dataset'
-    som_svm = MultipleSvm.load_variables(Smo, FONT_RESULT_PATH)
+    smo_svm = MultipleSvm.load_variables(Smo, FONT_RESULT_PATH)
 
     def handle_one(i):
         pic_file_path = '../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.jpg'
-        actual = get_digits(pic_file_path, som_svm)
+        actual = main_sudoku.get_digits(pic_file_path, smo_svm, True)
         difference = print_and_get_difference(actual, pic_data[i], i)
         show_difference(pic_file_path, actual, difference)
         return True
 
     # handle_one(7)
-    # handle_one(1)
-    map(handle_one, range(1,15))
+    handle_one(1)
+    # map(handle_one, range(1,15))
 
 
 if __name__ == '__main__':

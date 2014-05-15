@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <link href='css/bootstrap.min.css' rel='stylesheet' />
+    <link href='css/bootstrap-theme.min.css' rel='stylesheet' />
+    <link href='css/jquery.fileupload.css' rel='stylesheet' />
+<meta charset="utf-8">
+<title>jQuery File Upload Example</title>
+</head>
+<body>
+      <span class="btn btn-success fileinput-button">
+        <span>Select files...</span>
+        <!-- The file input field used as target for the file upload widget -->
+        <input id="fileupload" type="file" name="files" data-url="/upload" multiple>
+      </span>
+<div id="preview">
+</div>
+<p id='messages'>
+  Try it now. 
+</p>
+<div id='msg'>
+</div>
+<div id="progress">
+    <div class="bar" style="width: 0%;"></div>
+</div>
+<div id='file-upload-progress'></div>
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/jquery.ui.widget.js"></script>
+<script src="js/jquery.iframe-transport.js"></script>
+<script src="js/jquery.fileupload.js"></script>
+
+<!-- This is for resizing the pictures -->
+<script src="js/load-image.min.js"></script>
+<script src="js/canvas-to-blob.min.js"></script>
+<script src="js/jquery.fileupload-process.js"></script>
+<script src="js/jquery.fileupload-image.js"></script>
+<script src="js/jquery.fileupload-validate.js"></script>
+
+
+<script>
+function p(msg){
+    $('p#messages').text(msg);
+}
+function append_p(msg){
+    $('<p/>').text(msg).appendTo($('div#msg'));
+}
+$(function () {
+    $('#fileupload').fileupload({
+        type: 'POST',
+        dataType: 'json',
+        acceptFileTypes: /^image\/(gif|jpeg|png)$/,
+        maxFileSize: 10000000, // 10MB
+        // check if the browser support
+        disableImageResize: /Android(?!.*Chrome)|Opera/
+            .test(window.navigator && navigator.userAgent),
+        imageMaxWidth: 960,
+        imageMaxHeight: 960,
+        // imageCrop: true, // Force cropped images
+        imageForceResize: true, // resize images
+        previewMaxWidth: 960,
+        previewMaxHeight: 960,
+        done: function (e, data) {
+            append_p('done');
+            // append_p(data.result);
+            // data.context.html('<img src="'+data.result.files[0].thumbnailUrl+'" alt="'+data.result.files[0].name+'" />');
+            append_p(JSON.stringify(data.result, undefined, 2));
+        },
+        processdone:function (e, data) {
+            append_p('processdone');
+            current_file = data.files[data.index];
+            append_p(current_file.name);
+            append_p(current_file.type);
+            append_p(current_file.size);
+            $("div#preview").append(current_file.preview);
+        },
+        processfail:function (e, data) {
+            append_p('processfail');
+            append_p(data.files[data.index].error);
+        },
+        progressall: function (e, data) {
+            append_p('progressall');
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            append_p(progress);
+        }
+    }).on('fileuploadadd', function (e, data) {
+        // use this way to get add event, will not stop the upload automatically.
+        append_p('fileuploadadd');
+    });
+});
+</script>
+</body> 
+</html>

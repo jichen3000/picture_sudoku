@@ -12,3 +12,19 @@ http://stackoverflow.com/questions/10196198/how-to-remove-convexity-defects-in-a
 
 set
 PYTHONPATH=/Users/colin/work/picture_sudoku
+
+python          2.7.5
+
+The python packages used:
+numpy           1.6.2
+opencv          2.4.9
+bottle          0.12.7
+minitest        1.3.2
+
+The css packages used:
+bootstrap       3.1.1
+bootstrap-theme 3.1.1
+
+The js packages used:
+bootstrap   3.1.1
+jquery      1.11.1

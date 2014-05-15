@@ -1,23 +1,22 @@
  ☐ create a website which accept the sudoku pic, and give the sudoku puzzle, not give an answer.
  ☐ create android app to give the sudoku answer.
  ☐ ensmall the pic when upload to the server.
- ☐ remove italic in font training, and test pics again 
- ☐ retote the sudoku ragion, if there is an angle 
-
+ 
 
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
- ✔ observate many different sudoku pics, remove border masterly for different pics @done (14-05-11 08:06)
- ✔ get all numbers binary arrays from a sudoku pic, using canny @done (14-05-11 08:06)
+ ✔ remove italic in font training, and test pics again @done (14-05-12 08:03)
  ✔ test the the numbers binary arrays by digital recongnition. @done (14-05-11 08:07)
  ✔ check the angle of square to decide which way to get the number rect @done (14-05-11 08:07)
+ ✔ observate many different sudoku pics, remove border masterly for different pics @done (14-05-11 08:06)
+ ✔ get all numbers binary arrays from a sudoku pic, using canny @done (14-05-11 08:06)
+ ✔ test divide 9 for square. It's not a good solution since the ragion divided will get wrong space. @done (14-03-31 11:53)
  ✔ get number from binary text file. @done (14-03-15 15:55)
+ ✔ test font number error with svm. @done (14-03-15 15:53)
+ ✔ refactor svm implementation. @done (14-03-15 15:53)
+ ✔ remove margin from binary text file. @done (14-03-11 10:54)
  ✔ transfer a number pic file to binary text file. @done (14-03-10 14:32)
  ✔ split number pics from a whole sudoku pic file. @done (14-03-10 14:32)
  ✔ get the whole sudoku pic file from a normal pic file. @done (14-03-10 14:32)
- ✔ remove margin from binary text file. @done (14-03-11 10:54)
- ✔ test font number error with svm. @done (14-03-15 15:53)
- ✔ refactor svm implementation. @done (14-03-15 15:53)
- ✔ test divide 9 for square. It's not a good solution since the ragion divided will get wrong space. @done (14-03-31 11:53)
