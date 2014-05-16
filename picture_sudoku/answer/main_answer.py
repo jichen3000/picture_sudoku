@@ -166,8 +166,8 @@ if __name__ == '__main__':
              (6, 2, 6, 9), (6, 3, 7, 3), (6, 4, 7, 2), (6, 8, 8, 5), 
              (7, 2, 6, 1), (7, 5, 7, 7), (8, 1, 6, 2), (8, 6, 8, 7)])
 
-        difficult_known_points = gen_known_points_from_sample(difficult_sample)
-        point.transfer_points_list_to_points_hash(difficult_known_points).pp()
+        # difficult_known_points = gen_known_points_from_sample(difficult_sample)
+        # point.transfer_points_list_to_points_hash(difficult_known_points).pp()
 
 
     with test(gen_unknow_points):

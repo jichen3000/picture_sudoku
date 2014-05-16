@@ -34,7 +34,9 @@ def adjust_number_ragion(the_image):
     kernel_size_value = 2*1+1
     kernel = cv2.getStructuringElement(element_value, (kernel_size_value, kernel_size_value))
 
-    return cv2.dilate(the_image, kernel)
+    # return cv2.dilate(the_image, kernel)
+    # closing = erode(dilate(the_image, kernel))    
+    return cv2.morphologyEx(the_image, 3, kernel)
 
 def transfer_to_digit_matrix(the_ragion):
     '''

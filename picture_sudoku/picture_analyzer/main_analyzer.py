@@ -250,7 +250,9 @@ if __name__ == '__main__':
         #     36, 37, 39, 41, 43, 44, 48, 50, 63, 64, 70, 71, 72, 73, 75, 77, 79, 80))
         # number_ragions.size().must_equal(29)
 
-        image_path = '../../resource/example_pics/sample07.dataset.jpg'
+        # image_path = '../../resource/example_pics/sample07.dataset.jpg'
+        # number_indexs, number_ragions = extract_number_ragions(image_path)
+        image_path = '../../resource/example_pics/sample15.dataset.png'
         number_indexs, number_ragions = extract_number_ragions(image_path)
         # for i in range(1,15):
         #     pic_file_path = '../../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.jpg'

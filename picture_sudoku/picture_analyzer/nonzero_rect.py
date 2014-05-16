@@ -33,7 +33,8 @@ def analyze_from_center(the_ragion):
             return None
     # else:
     #     real_rect = cal_smallest_rect(nonzeros_in_rect)
-    return real_rect
+    # return real_rect
+    return (real_rect[0]+1, real_rect[1]+1, real_rect[2]-2, real_rect[3]-2)
 
 def has_enough_nonzeros(nonzeros, the_shape):
     return (float(nonzeros[0].size) / (the_shape[0] * the_shape[1]) ) > 0.01
@@ -212,14 +213,16 @@ if __name__ == '__main__':
 
     with test(analyze_from_center):
         rect_14_07 = analyze_from_center(image_14_07)
-        rect_14_07.must_equal((14, 10, 28, 41))
+        rect_14_07.must_equal((15, 11, 26, 39))
         # Display.rect(image_14_07_255, rect_14_07)
+        # Image.save_to_txt(Rect.get_ragion(rect_14_07, image_14_07), 
+        #     test_image_path+'sample_14_07_no.dataset')
 
         image_01_03_path = test_image_path+'sample_01_03.dataset'
         image_01_03 = Image.read_from_number_file(image_01_03_path)
         image_01_03_255 = numpy_helper.transfer_values_quickly(image_01_03, {1:255})
         rect_01_03 = analyze_from_center(image_01_03)
-        rect_01_03.must_equal((26, 25, 14, 19))
+        rect_01_03.must_equal((27, 26, 12, 17))
         # Display.rect(image_01_03_255, rect_01_03)
 
         image_02_null_path = test_image_path+'sample_02_null.dataset'
@@ -240,7 +243,7 @@ if __name__ == '__main__':
         image_13_05 = Image.read_from_number_file(image_13_05_path)
         image_13_05_255 = numpy_helper.transfer_values_quickly(image_13_05, {1:255})
         rect_13_05 = analyze_from_center(image_13_05)
-        rect_13_05.must_equal((16, 16, 18, 25))
+        rect_13_05.must_equal((17, 17, 16, 23))
         # Display.image(image_13_05_255)
         # Display.rect(image_13_05_255, rect_13_05)
 

@@ -73,7 +73,10 @@ def gen_pic_test_data():
                  'digits':(6, 8, 5, 6, 7, 3, 9, 4, 8, 1, 2, 2, 3, 7, 6, 1, 8, 9, 4, 6, 8, 6, 7, 9, 3, 8, 4, 2)},
                 14: 
                 {'indexs':(1, 6, 7, 9, 12, 14, 19, 25, 26, 27, 29, 31, 35, 39, 40, 41, 45, 49, 51, 53, 54, 55, 61, 66, 68, 71, 73, 74, 79),
-                 'digits':(1, 8, 6, 5, 3, 8, 8, 5, 9, 1, 4, 7, 5, 2, 5, 1, 6, 4, 1, 8, 7, 4, 8, 5, 7, 2, 6, 2, 7)}
+                 'digits':(1, 8, 6, 5, 3, 8, 8, 5, 9, 1, 4, 7, 5, 2, 5, 1, 6, 4, 1, 8, 7, 4, 8, 5, 7, 2, 6, 2, 7)},
+                15: 
+                {'indexs':(0, 8, 10, 12, 16, 20, 24, 28, 30, 32, 40, 48, 50, 52, 56, 60, 64, 68, 70, 72, 80),
+                 'digits':(9, 5, 4, 7, 3, 8, 1, 3, 6, 7, 8, 3, 9, 6, 1, 9, 2, 6, 4, 5, 8)}
             }
     return result
 
@@ -201,7 +204,10 @@ FONT_RESULT_PATH = '../resource/digit_recognition/font_training_result'
 def digit_recognize():
     mb = MultipleSvm.load_variables(Smo, FONT_RESULT_PATH)
 
-    file_path = '../resource/svm_wrong_digits/pic08_no04_real8_cal3.dataset'
+    # file_path = '../resource/svm_wrong_digits/pic04_no17_real8_cal3.dataset'
+    file_path = '../resource/svm_wrong_digits/pic04_no33_real8_cal3.dataset'
+    # file_path = '../resource/svm_wrong_digits/pic15_no19_real5_cal6_1.dataset'
+    # file_path = '../resource/svm_wrong_digits/pic15_no19_real5_cal6.dataset'
     number_ragion = numpy.mat(Image.read_from_number_file(file_path))
     transfered_ragion = numpy_helper.transfer_1to255(number_ragion)
     # adjusted_ragion = main_sudoku.adjust_number_ragion(transfered_ragion)
@@ -215,15 +221,18 @@ def digit_recognize():
 def adjust_number_ragion2(the_image):
     # element_value: {0: 'Rect', 1: 'Cross', 2: 'Ellipse'}
     element_value = 1
-    kernel_size_value = 2*3+1
+    kernel_size_value = 2*1+1
     kernel = cv2.getStructuringElement(element_value, (kernel_size_value, kernel_size_value))
 
+    # return the_image
     # return cv2.erode(the_image, kernel)
     # opening
     # return cv2.morphologyEx(the_image, 2, kernel)
-    # closing
+    # closing = erode(dilate(the_image, kernel))    
     return cv2.morphologyEx(the_image, 3, kernel)
     # return cv2.morphologyEx(the_image, 5, kernel)
+
+    # return cv2.dilate(the_image, kernel)
 
 
 
@@ -233,24 +242,32 @@ def vertify_all_pics():
     # hand_result_path = '../resource/digit_recognition/hand_dataset'
     smo_svm = MultipleSvm.load_variables(Smo, FONT_RESULT_PATH)
 
-    def handle_one(i):
-        pic_file_path = '../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.jpg'
+    def handle_one(i, extend_name='jpg'):
+        pic_file_path = '../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.'+extend_name
         actual = main_sudoku.get_digits(pic_file_path, smo_svm, True)
         difference = print_and_get_difference(actual, pic_data[i], i)
         show_difference(pic_file_path, actual, difference)
         return True
 
     # handle_one(7)
-    handle_one(1)
-    # map(handle_one, range(1,15))
+    # handle_one(4)
+    handle_one(15, 'png')
+    map(handle_one, range(1,15))
 
 
 if __name__ == '__main__':
     from minitest import *
+    '''
+        README: 
+            Using digit_recognize, you can vertify a single number image with svm.
+            Using vertify_all_pics, you can vertify all numbers in a image with svm,
+                it will show the difference, and save the wrong number image.
+    '''
     def main():
         # digit_recognize()
         vertify_all_pics()
         pass
+        # 4 8-3
 
     with test(main):
         main()

@@ -47,7 +47,7 @@ def save_upload_file(upload_obj):
         os.makedirs(save_path)
 
     file_path = "{path}/{file}".format(path=save_path, file=upload_obj.filename)
-    file_path.ppl()
+    # file_path.ppl()
     if os.path.isfile(file_path):
         os.remove(file_path)
     upload_obj.save(file_path)
