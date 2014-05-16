@@ -32,7 +32,7 @@
           <h3>
             Cells
             <small>please input your puzzle</small>
-            <small class='values-count atv'></small>
+            <small class='values-count text-danger'></small>
           </h3>
         </div>
         <div class='row'>
@@ -142,12 +142,12 @@
         <div class='col-md-5' id='operate'>
           <div class='alert alert-success' id='message-box'>
             <p id='messages'>
-              Try it now. You just need to input the puzzle in the cells, then click the 'Answer' button.
+              Please try it now. You just need to input the puzzle in the cells, then click the 'Answer' button.
             </p>
           </div>
           <div class='button-box well-sm'>
             To answer out the puzzle in the cells which has
-            <span class='atv'>at least 17 values.</span>
+            <span class='text-danger'>at least 17 values.</span>
             <div class='button'>
               <button class='btn btn-default' id='answer' data-loading-text="Answering..." >Answer</button>
             </div>
@@ -161,7 +161,8 @@
           <div class='button-box well-sm'>
             To generate an example puzzle in the cells.
             <div class='button'>
-              <button class='btn btn-default' id='example1'>Example</button>
+              <button class='btn btn-default' id='easy-example'>Easy example</button>
+              <button class='btn btn-default' id='difficaul-example'>Difficaul example</button>
             </div>
           </div>
         </div>

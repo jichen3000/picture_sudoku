@@ -3,11 +3,11 @@ function p(msg){
 }
 
 Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
+  var size = 0, key;
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) size++;
+  }
+  return size;
 };
 
 $(function() {
@@ -20,7 +20,7 @@ $(function() {
     }
   );
 
-  var fixClass = 'fix';
+  var fixedClass = 'fixed';
   var answeredClass = 'answered';
   var duplicatedClass = 'duplicated';
   var updateElement = null;
@@ -35,7 +35,7 @@ $(function() {
   
   $('#choose-value-dialog').find('.cell').click(function(e){
     // p(this.innerText);
-    $(updateElement).addClass(fixClass).text(this.innerText);
+    $(updateElement).addClass(fixedClass).text(this.innerText);
     $('#choose-value-dialog').modal('hide');
     refreshFixedPointsCount();
   });
@@ -46,11 +46,11 @@ $(function() {
     refreshFixedPointsCount();
   });
   function clearCell(current){
-    $(current).text('').removeClass(answeredClass).removeClass(fixClass).removeClass(duplicatedClass);
+    $(current).text('').removeClass(answeredClass).removeClass(fixedClass).removeClass(duplicatedClass);
   }
   function getFixedPoints(){
     var fixedPoints = {};
-    $('.'+fixClass).each(function(){
+    $('.'+fixedClass).each(function(){
       fixedPoints[this.id] = Number(this.innerText);
     });
     return fixedPoints;    
@@ -108,7 +108,7 @@ $(function() {
     return true; 
   }
   function refreshFixedPointsCount(){
-    var pointsCount = $('.'+fixClass).length+$('.'+answeredClass).length;
+    var pointsCount = $('.'+fixedClass).length+$('.'+answeredClass).length;
     $(".values-count").text("values count: "+pointsCount);
   }
   function displayPoints(points, needClass){
@@ -117,26 +117,26 @@ $(function() {
     }
   }
   $('button#answer').click(function(){
-    var current_button = $(this)
+    var curButton = $(this)
     var fixedPoints = getFixedPoints();
     if (!validateAll(fixedPoints)){ 
       return; 
     }
-    current_button.button('loading');
+    curButton.button('loading');
     $.ajax({
       type: 'POST',
-      url: '/sudoku/sudokuresult',
+      url: '/sudoku/input/result',
       data: JSON.stringify(fixedPoints),
       contentType: 'application/json',
       success: function(result){
         //p('get success!'+result);
         if (result==="false"){
-          current_button.button('reset');
+          curButton.button('reset');
           p('Sorry! This quiz has not an answer at all!');
           return false;
         }      
         displayPoints(JSON.parse(result), answeredClass);
-        current_button.button('reset');
+        curButton.button('reset');
         p('Successful!');
         refreshFixedPointsCount();
       }
@@ -159,7 +159,7 @@ $(function() {
     $('.'+answeredClass).each(function(){
       clearCell(this);
     });
-    $('.'+fixClass).each(function(){
+    $('.'+fixedClass).each(function(){
       clearCell(this);
     });
     refreshFixedPointsCount();
@@ -173,10 +173,26 @@ $(function() {
     var fixedPoints = getFixedPoints();
     p(JSON.stringify(fixedPoints));
   });
-  $('button#example1').click(function(){
+  $('button#easy-example').click(function(){
     $('button#clear').click();
-    var fixedPoints = '{"0_0":5,"1_0":3,"0_1":6,"1_2":9,"2_2":8,"4_0":7,"3_1":1,"4_1":9,"5_1":5,"7_2":6,"0_3":8,"0_4":4,"0_5":7,"4_3":6,"3_4":8,"5_4":3,"4_5":2,"8_3":3,"8_4":1,"8_5":6,"1_6":6,"3_7":4,"4_7":1,"5_7":9,"4_8":8,"6_6":2,"7_6":8,"8_7":5,"7_8":7,"8_8":9}';
-    displayPoints(JSON.parse(fixedPoints), fixClass);
+    var fixedPoints = '{"0_0":5,"1_0":3,"0_1":6,"1_2":9,"2_2":8,' +
+                      '"4_0":7,"3_1":1,"4_1":9,"5_1":5,"7_2":6,' +
+                      '"0_3":8,"0_4":4,"0_5":7,"4_3":6,"3_4":8,' +
+                      '"5_4":3,"4_5":2,"8_3":3,"8_4":1,"8_5":6,' +
+                      '"1_6":6,"3_7":4,"4_7":1,"5_7":9,"4_8":8,' +
+                      '"6_6":2,"7_6":8,"8_7":5,"7_8":7,"8_8":9}';
+    displayPoints(JSON.parse(fixedPoints), fixedClass);
+    refreshFixedPointsCount();
+    p("Added values in the cells as an example, then you just click the Answer button.");
+  });
+  $('button#difficaul-example').click(function(){
+    $('button#clear').click();
+    var fixedPoints = '{"0_0": 9, "0_8": 5, "1_1": 4, "1_3": 3, "1_7": 2,' +
+                      ' "2_2": 8, "2_6": 1, "3_1": 7, "3_3": 6, "3_5": 3, ' +
+                      ' "4_4": 8, "5_3": 7, "5_5": 9, "5_7": 6, "6_2": 1, ' +
+                      ' "6_6": 9, "7_1": 3, "7_5": 6, "7_7": 4, "8_0": 5, ' +
+                      ' "8_8": 8}';
+    displayPoints(JSON.parse(fixedPoints), fixedClass);
     refreshFixedPointsCount();
     p("Added values in the cells as an example, then you just click the Answer button.");
   });

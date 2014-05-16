@@ -98,7 +98,9 @@ def answer_quiz_with_indexs_and_digits(number_indexs, digits):
     def create_points(number_indexs, digits):
         return map(point.create_point, number_indexs, digits)
     known_points = create_points(number_indexs, digits)
-    return main_answer_quiz(known_points)
+    result = {'fixed':point.transfer_points_list_to_points_hash(known_points),
+              'answered':main_answer_quiz(known_points)}
+    return result
 
 def answer(unknow_points, unshow_numbers):
     computed_points = exclude_compute_all(unknow_points, unshow_numbers)
@@ -143,7 +145,7 @@ if __name__ == '__main__':
                 (7,0,9,3,2,0,0,0,5),
                 (0,0,1,0,0,7,0,0,0),
                 (0,2,0,0,0,0,7,0,0))
-    complex_sample = (
+    difficult_sample = (
                 (9,0,0,0,0,0,0,0,5),
                 (0,4,0,3,0,0,0,2,0),
                 (0,0,8,0,0,0,1,0,0),
@@ -153,6 +155,7 @@ if __name__ == '__main__':
                 (0,0,1,0,0,0,9,0,0),
                 (0,3,0,0,0,6,0,4,0),
                 (5,0,0,0,0,0,0,0,8))
+
     with test(gen_known_points_from_sample):
         known_points = gen_known_points_from_sample(media_sample)
         known_points.must_equal(
@@ -162,6 +165,11 @@ if __name__ == '__main__':
              (4, 5, 4, 3), (4, 6, 5, 6), (5, 0, 3, 4), (6, 0, 6, 7), 
              (6, 2, 6, 9), (6, 3, 7, 3), (6, 4, 7, 2), (6, 8, 8, 5), 
              (7, 2, 6, 1), (7, 5, 7, 7), (8, 1, 6, 2), (8, 6, 8, 7)])
+
+        difficult_known_points = gen_known_points_from_sample(difficult_sample)
+        point.transfer_points_list_to_points_hash(difficult_known_points).pp()
+
+
     with test(gen_unknow_points):
         unknow_points = gen_unknow_points(known_points)
         unknow_points.size().must_equal(57)
@@ -176,6 +184,9 @@ if __name__ == '__main__':
              (6, 7, 8), (7, 0, 6), (7, 1, 6), (7, 3, 7), (7, 4, 7), (7, 6, 8), 
              (7, 7, 8), (7, 8, 8), (8, 0, 6), (8, 2, 6), (8, 3, 7), (8, 4, 7), 
              (8, 5, 7), (8, 7, 8), (8, 8, 8)])
+
+
+
     with test(gen_unshow_numbers):
         unshow_numbers = gen_unshow_numbers(known_points)
         unshow_numbers.must_equal(
@@ -206,6 +217,66 @@ if __name__ == '__main__':
              ('col', 4): [1, 3, 5, 6, 7, 8], 
              ('region', 2): [3, 6, 7, 8, 9], 
              ('region', 3): [1, 2, 3, 5, 7, 8, 9]})
+
+    with test(answer_quiz_with_point_hash):
+        point_hash = {  u'0_0': 5, u'0_1': 6, u'0_3': 8, u'0_4': 4, u'0_5': 7, 
+                        u'1_0': 3, u'1_2': 9, u'1_6': 6, u'2_2': 8, u'3_1': 1, 
+                        u'3_4': 8, u'3_7': 4, u'4_0': 7, u'4_1': 9, u'4_3': 6, 
+                        u'4_5': 2, u'4_7': 1, u'4_8': 8, u'5_1': 5, u'5_4': 3, 
+                        u'5_7': 9, u'6_6': 2, u'7_2': 6, u'7_6': 8, u'7_8': 7, 
+                        u'8_3': 3, u'8_4': 1, u'8_5': 6, u'8_7': 5, u'8_8': 9 }
+        answer_quiz_with_point_hash(point_hash).must_equal(
+            {'0_2': 1, '0_6': 9, '0_7': 2, '0_8': 3, '1_1': 7,
+             '1_3': 5, '1_4': 2, '1_5': 1, '1_7': 8, '1_8': 4,
+             '2_0': 4, '2_1': 2, '2_3': 9, '2_4': 6, '2_5': 3,
+             '2_6': 1, '2_7': 7, '2_8': 5, '3_0': 6, '3_2': 3,
+             '3_3': 7, '3_5': 9, '3_6': 5, '3_8': 2, '4_2': 4,
+             '4_4': 5, '4_6': 3, '5_0': 8, '5_2': 2, '5_3': 1,
+             '5_5': 4, '5_6': 7, '5_8': 6, '6_0': 9, '6_1': 3, 
+             '6_2': 5, '6_3': 4, '6_4': 7, '6_5': 8, '6_7': 6, 
+             '6_8': 1, '7_0': 1, '7_1': 4, '7_3': 2, '7_4': 9, 
+             '7_5': 5, '7_7': 3, '8_0': 2, '8_1': 8, '8_2': 7, 
+             '8_6': 4 })
+
+    with test(answer_quiz_with_indexs_and_digits):
+        number_indexs = (0, 1, 4, 9, 12, 13, 14, 19, 20, 25, 27, 31, 35, 36, 39, 
+            41, 44, 45, 49, 53, 55, 60, 61, 66, 67, 68, 71, 76, 79, 80)
+        digits = (5, 3, 7, 6, 1, 9, 5, 9, 8, 6, 8, 6, 3, 4, 8, 
+            3, 1, 7, 2, 6, 6, 2, 8, 4, 1, 9, 5, 8, 7, 9)
+        answer_quiz_with_indexs_and_digits(number_indexs, digits).must_equal(
+            { 'fixed': 
+                   {'0_0': 5, '0_1': 6, '0_3': 8, '0_4': 4, '0_5': 7, 
+                    '1_0': 3, '1_2': 9, '1_6': 6, '2_2': 8, '3_1': 1, 
+                    '3_4': 8, '3_7': 4, '4_0': 7, '4_1': 9, '4_3': 6, 
+                    '4_5': 2, '4_7': 1, '4_8': 8, '5_1': 5, '5_4': 3, 
+                    '5_7': 9, '6_6': 2, '7_2': 6, '7_6': 8, '7_8': 7, 
+                    '8_3': 3, '8_4': 1, '8_5': 6, '8_7': 5, '8_8': 9},
+              'answered':
+                   {'0_2': 1, '0_6': 9, '0_7': 2, '0_8': 3, '1_1': 7,
+                    '1_3': 5, '1_4': 2, '1_5': 1, '1_7': 8, '1_8': 4,
+                    '2_0': 4, '2_1': 2, '2_3': 9, '2_4': 6, '2_5': 3,
+                    '2_6': 1, '2_7': 7, '2_8': 5, '3_0': 6, '3_2': 3,
+                    '3_3': 7, '3_5': 9, '3_6': 5, '3_8': 2, '4_2': 4,
+                    '4_4': 5, '4_6': 3, '5_0': 8, '5_2': 2, '5_3': 1,
+                    '5_5': 4, '5_6': 7, '5_8': 6, '6_0': 9, '6_1': 3, 
+                    '6_2': 5, '6_3': 4, '6_4': 7, '6_5': 8, '6_7': 6, 
+                    '6_8': 1, '7_0': 1, '7_1': 4, '7_3': 2, '7_4': 9, 
+                    '7_5': 5, '7_7': 3, '8_0': 2, '8_1': 8, '8_2': 7, 
+                    '8_6': 4 }})
+
+
+        # answer_quiz_with_indexs_and_digits(number_indexs, digits).must_equal(
+        #     {'0_2': 1, '0_6': 9, '0_7': 2, '0_8': 3, '1_1': 7,
+        #      '1_3': 5, '1_4': 2, '1_5': 1, '1_7': 8, '1_8': 4,
+        #      '2_0': 4, '2_1': 2, '2_3': 9, '2_4': 6, '2_5': 3,
+        #      '2_6': 1, '2_7': 7, '2_8': 5, '3_0': 6, '3_2': 3,
+        #      '3_3': 7, '3_5': 9, '3_6': 5, '3_8': 2, '4_2': 4,
+        #      '4_4': 5, '4_6': 3, '5_0': 8, '5_2': 2, '5_3': 1,
+        #      '5_5': 4, '5_6': 7, '5_8': 6, '6_0': 9, '6_1': 3, 
+        #      '6_2': 5, '6_3': 4, '6_4': 7, '6_5': 8, '6_7': 6, 
+        #      '6_8': 1, '7_0': 1, '7_1': 4, '7_3': 2, '7_4': 9, 
+        #      '7_5': 5, '7_7': 3, '8_0': 2, '8_1': 8, '8_2': 7, 
+        #      '8_6': 4 })
 
     with test(choose_guess_point_values):
         choose_guess_point_values(unknow_points, unshow_numbers).must_equal([(0, 6, 2, 3)])

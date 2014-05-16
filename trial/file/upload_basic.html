@@ -8,11 +8,21 @@
 <title>jQuery File Upload Example</title>
 </head>
 <body>
-      <span class="btn btn-success fileinput-button">
-        <span>Select files...</span>
-        <!-- The file input field used as target for the file upload widget -->
-        <input id="fileupload" type="file" name="files" data-url="/upload" multiple>
-      </span>
+<span class="btn btn-success fileinput-button">
+    <span>Select files...</span>
+    <!-- The file input field used as target for the file upload widget -->
+    <input id="fileupload" type="file" name="files" data-url="/upload" multiple>
+</span>
+<button id="clear" class="btn btn-default">Clear</button>
+<!--     <div id="progress" class="progress">
+        <div class="progress-bar progress-bar-success"></div>
+    </div>
+ -->
+ <div id="progress" class="progress progress-striped" style="width: 30%; display: none;">
+  <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    <span></span>
+  </div>
+</div>    
 <div id="preview">
 </div>
 <p id='messages'>
@@ -44,7 +54,12 @@ function p(msg){
 function append_p(msg){
     $('<p/>').text(msg).appendTo($('div#msg'));
 }
+
 $(function () {
+    $('button#clear').click(function(event){
+        $('canvas').remove();
+        $('#progress').hide();
+    })
     $('#fileupload').fileupload({
         type: 'POST',
         dataType: 'json',
@@ -57,15 +72,15 @@ $(function () {
         imageMaxHeight: 960,
         // imageCrop: true, // Force cropped images
         imageForceResize: true, // resize images
-        previewMaxWidth: 960,
-        previewMaxHeight: 960,
-        done: function (e, data) {
+        previewMaxWidth: 480,
+        previewMaxHeight: 480,
+        done: function (event, data) {
             append_p('done');
             // append_p(data.result);
             // data.context.html('<img src="'+data.result.files[0].thumbnailUrl+'" alt="'+data.result.files[0].name+'" />');
             append_p(JSON.stringify(data.result, undefined, 2));
         },
-        processdone:function (e, data) {
+        processdone:function (event, data) {
             append_p('processdone');
             current_file = data.files[data.index];
             append_p(current_file.name);
@@ -73,16 +88,21 @@ $(function () {
             append_p(current_file.size);
             $("div#preview").append(current_file.preview);
         },
-        processfail:function (e, data) {
+        processfail:function (event, data) {
             append_p('processfail');
             append_p(data.files[data.index].error);
         },
-        progressall: function (e, data) {
+        progressall: function (event, data) {
             append_p('progressall');
             var progress = parseInt(data.loaded / data.total * 100, 10);
             append_p(progress);
+            $('#progress').show();
+            $('#progress .progress-bar').css(
+                'width',
+                progress + '%'
+            ).text(progress + '%').attr('aria-valuenow',progress);
         }
-    }).on('fileuploadadd', function (e, data) {
+    }).on('fileuploadadd', function (event, data) {
         // use this way to get add event, will not stop the upload automatically.
         append_p('fileuploadadd');
     });

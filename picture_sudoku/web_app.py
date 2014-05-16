@@ -1,6 +1,7 @@
 from bottle import route, run, request, static_file
 from picture_sudoku import main_sudoku
 
+import os
 
 @route("/manual_input")
 def sudoku_main_html():
@@ -20,15 +21,72 @@ def sudoku_js(filename):
 
 import json
 # notice: when you use json, you must use post instead of get.
-@route("/sudoku/sudokuresult", method='POST')
+@route("/sudoku/input/result", method='POST')
 def sudoku_result():
     points_hash = request.json
-    answer = main_sudoku.answer_quiz_with_point_hash(points_hash)
-    if answer:
-        return json.dumps(answer)
+    points_hash.pl()
+    answer_result = main_sudoku.answer_quiz_with_point_hash(points_hash)
+    if answer_result:
+        return json.dumps(answer_result)
     else:
         return "false"
 
+@route("/sudoku/image/result", method='POST')
+def image_result():
+    pic_file_path = save_upload_file(request.files['files'])
+    answer_result = main_sudoku.answer_quiz_with_pic(pic_file_path)
+    if answer_result:
+        answer_result['pic_file_name'] = os.path.basename(pic_file_path)
+        return json.dumps(answer_result)
+    else:
+        return "false"
 
-# print "http://localhost:9996"
-run(host='localhost', port=9996,reloader=True)
+def save_upload_file(upload_obj):
+    save_path = "../resource/tmp_images/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    file_path = "{path}/{file}".format(path=save_path, file=upload_obj.filename)
+    file_path.ppl()
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+    upload_obj.save(file_path)
+    return file_path    
+
+# for upload test
+@route('/upload/puzzle_image', method='POST')
+def do_upload():
+    print 'uploading...'
+    import time
+    time.sleep(2)
+    upload = request.files['files']
+    print dir(upload)
+    # upload = request.files.get('upload')
+    # name, ext = os.path.splitext(upload.filename)
+    # if ext not in ('.png','.jpg','.jpeg'):
+    #     return "File extension not allowed."
+
+    save_path = "../resource/tmp_images/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    file_path = "{path}/{file}".format(path=save_path, file=upload.filename)
+    file_path.ppl()
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+    upload.save(file_path)
+    # return "File successfully saved to '{0}'.".format(file_path)
+    import cv2
+    the_image = cv2.imread(file_path)
+    the_image.shape.ppl()
+    # cv2.imshow('123', the_image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    print 'after save!'
+    # return file_path
+    return json.dumps({'path':file_path})
+
+if __name__ == '__main__':
+    from minitest import *
+    # print "http://localhost:9996"
+    run(host='localhost', port=9996,reloader=True)

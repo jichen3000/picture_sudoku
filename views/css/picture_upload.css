@@ -36,22 +36,10 @@
 .container{
   width: 790px;
 }
-#choose-form{
-  background-color: #F7F7F9;
+#progress{
+  margin-top: 10px;
+  display: none;
 }
-#values-count{
-  font-size: 13px;
-}
-#choose-value-dialog{
-  /*width: auto;*/
-}
-#choose-value-dialog-content{
-  width: 149px;
-  margin: 0px;
-}
-.margin-zero{
-  margin: 0px;
-}
-#choose-buttons{
-  margin-top: 0px;
+#preview{
+  margin-top: 20px;  
 }
