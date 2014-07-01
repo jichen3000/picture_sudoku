@@ -19,12 +19,16 @@ def sudoku_css(filename):
 def sudoku_js(filename):
     return static_file(filename, root='../views/js')
 
+@route("/sudoku/webapp", method='GET')
+def test_exists():
+    return "true"
+
 import json
 # notice: when you use json, you must use post instead of get.
 @route("/sudoku/input/result", method='POST')
 def sudoku_result():
     points_hash = request.json
-    points_hash.pl()
+    # points_hash.pl()
     answer_result = main_sudoku.answer_quiz_with_point_hash(points_hash)
     if answer_result:
         return json.dumps(answer_result)
@@ -35,11 +39,7 @@ def sudoku_result():
 def image_result():
     pic_file_path = save_upload_file(request.files['files'])
     answer_result = main_sudoku.answer_quiz_with_pic(pic_file_path)
-    if answer_result:
-        answer_result['pic_file_name'] = os.path.basename(pic_file_path)
-        return json.dumps(answer_result)
-    else:
-        return "false"
+    return json.dumps(answer_result)
 
 def save_upload_file(upload_obj):
     save_path = "../resource/tmp_images/"
