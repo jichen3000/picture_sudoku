@@ -62,20 +62,20 @@ $(function() {
     previewMaxWidth: 640,
     previewMaxHeight: 960,
     done: function (event, data) {
-      // append_p(data.result);
-      // data.context.html('<img src="'+data.result.files[0].thumbnailUrl+'" alt="'+data.result.files[0].name+'" />');
-      // p(JSON.stringify(data.result, undefined, 2));
       $('#progress').hide();
       // $("#upload").button('reset');
       buttonReset($("#upload"));
       // the data has been changed to be json object, so don't need to JSON.parse
-      displayPoints(data.result[fixedClass], fixedClass);
-      if (data.result[answeredClass]){
+      if(data.result['status'] == 'SUCCESS'){
+        displayPoints(data.result[fixedClass], fixedClass);
         displayPoints(data.result[answeredClass], answeredClass);
         p('Done! '+data.result['pic_file_name']);
       }else{
-        p('Sorry, cannot answer it, since this puzzle may not follow the rules of Sudoku! The file name is'+
-          data.result['pic_file_name']);
+        if(data.result[fixedClass]){
+          displayPoints(data.result[fixedClass], fixedClass);
+        }
+        p('Sorry, this puzzle cannot be answered! The file name is'+data.result['pic_file_name']);
+
       }
     },
     processdone:function (event, data) {

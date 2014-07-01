@@ -129,31 +129,18 @@ $(function() {
       data: JSON.stringify(fixedPoints),
       contentType: 'application/json',
       success: function(result){
-        //p('get success!'+result);
-        if (result==="false"){
-          curButton.button('reset');
-          p('Sorry! This quiz has not an answer at all!');
-          return false;
-        }      
-        displayPoints(JSON.parse(result), answeredClass);
+        data_result = JSON.parse(result)
+        if(data_result['status'] == 'SUCCESS'){
+          displayPoints(data_result[answeredClass], answeredClass);
+          p('Done!');
+        }else{
+          p('Sorry, this puzzle cannot be answered!');
+        }
+
         curButton.button('reset');
-        p('Successful!');
         refreshFixedPointsCount();
       }
     });
-    //p(JSON.stringify(fixedPoints));
-    // $.get('/sudoku/sudokuresult',{fix_values:JSON.stringify(fixedPoints)},function(result){
-    //   //p('get success!'+result);
-    //   if (result==="false"){
-    //     $('#process-dialog').modal('hide');
-    //     p('Sorry! This quiz has not an answer at all!');
-    //     return false;
-    //   }      
-    //   displayPoints(JSON.parse(result), answeredClass);
-    //   $('#process-dialog').modal('hide');
-    //   p('Successful!');
-    //   refreshFixedPointsCount();
-    // }, "json");
   });
   $('button#clear').click(function(){
     $('.'+answeredClass).each(function(){

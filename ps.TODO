@@ -1,12 +1,22 @@
- ☐ create a website which accept the sudoku pic, and give the sudoku puzzle, not give an answer.
  ☐ create android app to give the sudoku answer.
- ☐ ensmall the pic when upload to the server.
- 
+ ☐ create ios app to give the sudoku answer.
+ ☐ support unicode, so it can show Chinese properly.
 
+ ☐ change app theme 
+ ☐ crop pic size before upload 
+ ☐ add progress when uploading 
+ ☐ check web app live, before uploading 
+ ☐ support Chinese 
+ ☐ add exit button 
+ ☐ fix bug: when I upload 5 times, it would not work again. it's not the issue of web app. 
+ 
+☐ fix bug: cannot handle other pictures without sudoku puzzle.
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ create a website which accept the sudoku pic, and give the sudoku puzzle, not give an answer. @done (14-05-17 07:57)
+ ✔ ensmall the pic when upload to the server. @done (14-05-17 07:57)
  ✔ remove italic in font training, and test pics again @done (14-05-12 08:03)
  ✔ test the the numbers binary arrays by digital recongnition. @done (14-05-11 08:07)
  ✔ check the angle of square to decide which way to get the number rect @done (14-05-11 08:07)
