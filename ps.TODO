@@ -2,15 +2,15 @@
  ☐ create ios app to give the sudoku answer.
  ☐ support unicode, so it can show Chinese properly.
 
+ ☐ add progress when uploading 
  ☐ change app theme 
  ☐ crop pic size before upload 
- ☐ add progress when uploading 
  ☐ check web app live, before uploading 
- ☐ support Chinese 
  ☐ add exit button 
+ ☐ support Chinese 
  ☐ fix bug: when I upload 5 times, it would not work again. it's not the issue of web app. 
  
-☐ fix bug: cannot handle other pictures without sudoku puzzle.
+✔ fix bug: cannot handle other pictures without sudoku puzzle. @done (14-07-02 05:03)
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿

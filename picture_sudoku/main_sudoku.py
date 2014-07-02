@@ -111,6 +111,8 @@ def answer_common(the_func):
         if (result[RESULT_ANSWERED]):
             result[RESULT_STATUS] = STATUS_SUCCESS
         else:
+            # remove key for java
+            result.pop(RESULT_ANSWERED)
             result[RESULT_STATUS] = STATUS_FAILURE
             result[RESULT_ERROR] = ERROR_CANNOT_ANSWER
     except Exception, e:
@@ -158,7 +160,6 @@ if __name__ == '__main__':
         pic_file_path = '../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.jpg'
         answer_quiz_with_pic(pic_file_path).must_equal(
             {'pic_file_name': 'sample07.dataset.jpg', 
-             'answered': False, 
              'status': 'FAILURE', 
              'error': ERROR_CANNOT_ANSWER,
              'fixed': 
@@ -208,5 +209,5 @@ if __name__ == '__main__':
                         u'5_7': 9, u'6_6': 2, u'7_2': 6, u'7_6': 8, u'7_8': 7, 
                         u'8_3': 3, u'8_4': 1, u'8_5': 5, u'8_7': 5, u'8_8': 9 }
         answer_quiz_with_point_hash(point_hash).must_equal(
-            {'answered': False, 'error': ERROR_CANNOT_ANSWER, 'status': 'FAILURE'})
+            {'error': ERROR_CANNOT_ANSWER, 'status': 'FAILURE'})
 
