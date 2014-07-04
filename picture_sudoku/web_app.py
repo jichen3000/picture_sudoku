@@ -1,11 +1,8 @@
 import os
 import sys
 
-print "os.environ", os.environ
-os.environ["PYTHONPATH"] = "/app:"+os.environ["PYTHONPATH"]
-print "new os.environ", os.environ
-sys.stdout.flush()
-
+# just for heroku run
+sys.path.append('/app/')
 
 from bottle import route, run, request, static_file
 from picture_sudoku import main_sudoku
