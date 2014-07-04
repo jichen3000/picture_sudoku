@@ -93,6 +93,7 @@ def save_upload_file(upload_obj):
 # if __name__ == '__main__':
 #     from minitest import *
     # print "http://localhost:9996"
+print "os.environ", os.environ
 app_port = sys.argv[1] if len(sys.argv) > 1 else 9996
 run(host='0.0.0.0', port=app_port)
 # run(host='localhost', port=9996, reloader=True)
