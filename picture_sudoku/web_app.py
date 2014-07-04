@@ -2,6 +2,8 @@ import os
 import sys
 
 print "os.environ", os.environ
+os.environ["PYTHONPATH"] = "/app:"+os.environ["PYTHONPATH"]
+print "new os.environ", os.environ
 sys.stdout.flush()
 
 
