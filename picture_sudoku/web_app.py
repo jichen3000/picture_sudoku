@@ -1,12 +1,12 @@
+import os
+import sys
+
 print "os.environ", os.environ
 sys.stdout.flush()
 
 
 from bottle import route, run, request, static_file
 from picture_sudoku import main_sudoku
-
-import os
-import sys
 
 @route("/manual_input")
 def sudoku_main_html():
