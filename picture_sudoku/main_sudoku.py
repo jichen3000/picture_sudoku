@@ -123,6 +123,8 @@ def answer_common(the_func):
     except Exception, e:
         import traceback
         print(traceback.format_exc())
+        import sys
+        sys.stdout.flush()
         result = {RESULT_STATUS:STATUS_FAILURE, 
                 RESULT_ERROR:e.message}
     return result
