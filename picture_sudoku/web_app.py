@@ -24,6 +24,7 @@ def sudoku_js(filename):
 def test_exists():
     return "true"
 
+
 import json
 # notice: when you use json, you must use post instead of get.
 @route("/sudoku/input/result", method='POST')
