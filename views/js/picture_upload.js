@@ -55,8 +55,8 @@ $(function() {
     // check if the browser support
     disableImageResize: /Android(?!.*Chrome)|Opera/
         .test(window.navigator && navigator.userAgent),
-    imageMaxWidth: 960,
-    imageMaxHeight: 960,
+    imageMaxWidth: 700,
+    imageMaxHeight: 700,
     // imageCrop: true, // Force cropped images
     imageForceResize: true, // resize images
     previewMaxWidth: 640,
@@ -74,7 +74,7 @@ $(function() {
         if(data.result[fixedClass]){
           displayPoints(data.result[fixedClass], fixedClass);
         }
-        p('Sorry, this puzzle cannot be answered! The file name is'+data.result['pic_file_name']);
+        p('Sorry, this puzzle cannot be answered! The file name is '+data.result['pic_file_name']);
 
       }
     },

@@ -16,7 +16,7 @@ from picture_sudoku.answer import main_answer
 IMG_SIZE = 32
 FULL_SIZE = 1024
 
-FONT_RESULT_PATH = '../resource/digit_recognition/font_training_result'
+FONT_RESULT_PATH = 'resource/digit_recognition/font_training_result'
 
 STATUS_SUCCESS = "SUCCESS"
 STATUS_FAILURE = "FAILURE"
@@ -75,10 +75,14 @@ def transfer_to_digit_matrix(the_ragion):
 #     result[RESULT_FILENAME] = os.path.basename(pic_file_path)
 #     return result
 
+global_smo_svm = None
 def answer_quiz_with_pic(pic_file_path):
     def intent_func():
-        smo_svm = MultipleSvm.load_variables(Smo, FONT_RESULT_PATH)
-        number_indexs, digits = get_digits(pic_file_path, smo_svm)
+        global global_smo_svm
+        if global_smo_svm==None:
+            # global_smo_svm.ppl()
+            global_smo_svm = MultipleSvm.load_variables(Smo, FONT_RESULT_PATH)
+        number_indexs, digits = get_digits(pic_file_path, global_smo_svm)
         return main_answer.answer_quiz_with_indexs_and_digits(number_indexs, digits)
     result = answer_common(intent_func)
     result[RESULT_FILENAME] = os.path.basename(pic_file_path)
@@ -125,6 +129,8 @@ def answer_common(the_func):
 if __name__ == '__main__':
     from minitest import *
     from picture_sudoku.cv2_helpers.display import Display
+
+    FONT_RESULT_PATH = '../resource/digit_recognition/font_training_result'
 
 
 

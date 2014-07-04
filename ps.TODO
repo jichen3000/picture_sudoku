@@ -2,19 +2,24 @@
  ☐ create ios app to give the sudoku answer.
  ☐ support unicode, so it can show Chinese properly.
 
- ☐ add progress when uploading 
- ☐ change app theme 
- ☐ crop pic size before upload 
+ ☐ set web site on independent machine, so I can test android app on my phone.
  ☐ check web app live, before uploading 
  ☐ add exit button 
  ☐ support Chinese 
  ☐ fix bug: when I upload 5 times, it would not work again. it's not the issue of web app. 
+ ☐ website cannot handle big picture.
+ ☐ fix the path issue, in web_app.py and main_sudoku.py
+
+
  
-✔ fix bug: cannot handle other pictures without sudoku puzzle. @done (14-07-02 05:03)
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ add progress when uploading @done (14-07-02 11:13)
+ ✔ change app theme @done (14-07-02 11:30)
+ ✔ crop pic size before upload @done (14-07-03 10:51)
+ ✔ fix bug: cannot handle other pictures without sudoku puzzle. @done (14-07-02 05:03)
  ✔ create a website which accept the sudoku pic, and give the sudoku puzzle, not give an answer. @done (14-05-17 07:57)
  ✔ ensmall the pic when upload to the server. @done (14-05-17 07:57)
  ✔ remove italic in font training, and test pics again @done (14-05-12 08:03)
