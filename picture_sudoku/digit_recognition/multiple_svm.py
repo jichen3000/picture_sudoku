@@ -40,7 +40,7 @@ class MultipleSvm(object):
         self.binary_class = binary_class
         self.classifying_hash = {}
         
-    variables_file_name = 'multiple_binary.dataset'
+    variables_file_name = 'multiple_binary.finaldata'
 
     def build_classifying_objects(self, data_matrix_hash, 
                 edge_threshold, tolerance, max_iteration_count, arg_exp, data_path):
@@ -309,10 +309,6 @@ if __name__ == '__main__':
         # {'error_count': 38, 'error_ratio %': 4.02, 'row_count': 946}
         pass
 
-
-    with test("test_multi"):
-        test_multi()
-        pass
 
 
     with test("test_multi"):
