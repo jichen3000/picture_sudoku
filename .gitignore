@@ -14,4 +14,4 @@
 *.dataset.*
 build
 dist
-.venv
+venv
