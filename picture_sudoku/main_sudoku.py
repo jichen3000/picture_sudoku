@@ -16,7 +16,8 @@ from picture_sudoku.answer import main_answer
 IMG_SIZE = 32
 FULL_SIZE = 1024
 
-FONT_RESULT_PATH = 'resource/digit_recognition/font_training_result'
+# FONT_RESULT_PATH = 'resource/digit_recognition/font_training_result'
+FONT_RESULT_PATH = 'other_resource/font_training_result'
 
 STATUS_SUCCESS = "SUCCESS"
 STATUS_FAILURE = "FAILURE"
@@ -130,7 +131,8 @@ if __name__ == '__main__':
     from minitest import *
     from picture_sudoku.cv2_helpers.display import Display
 
-    FONT_RESULT_PATH = '../resource/digit_recognition/font_training_result'
+    # FONT_RESULT_PATH = '../resource/digit_recognition/font_training_result'
+    FONT_RESULT_PATH = '../other_resource/font_training_result'
 
 
 

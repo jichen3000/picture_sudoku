@@ -47,8 +47,9 @@ def image_result():
     return json.dumps(answer_result)
 
 def save_upload_file(upload_obj):
-    save_path = "resource/tmp_images/"
-    # save_path = os.environ['APPDIR']
+    # save_path = "resource/tmp_images/"
+    save_path = "tmp_images/"
+
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
