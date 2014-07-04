@@ -55,6 +55,8 @@ def save_upload_file(upload_obj):
 
     file_path = "{path}/{file}".format(path=save_path, file=upload_obj.filename)
     # file_path.ppl()
+    print "file_path:",file_path
+    sys.stdout.flush()
     if os.path.isfile(file_path):
         os.remove(file_path)
     upload_obj.save(file_path)

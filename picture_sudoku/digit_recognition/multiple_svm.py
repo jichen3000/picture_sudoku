@@ -56,12 +56,15 @@ class MultipleSvm(object):
 
             classifying_key = (label_i, label_j)
             file_prefix = '_'.join((str(label_i),  str(label_j), ''))
-            transfer_hash = {label_i:-1, label_j:1}
+            # transfer_hash = {label_i:-1, label_j:1}
+            transfer_hash = {label_j:-1, label_i:1}
 
             self.label_tuple = tuple(data_matrix_hash.keys())
 
             smo = self.binary_class.train(data_matrix,label_matrix, 
                     edge_threshold, tolerance, max_iteration_count, arg_exp, transfer_hash)
+            # smo.transfer_hash.ppl()
+            # smo.reversed_transfer_hash.ppl()
             smo.test(data_matrix,label_matrix).pp()
             smo.save_variables(data_path, prefix = file_prefix)
             self.classifying_hash[classifying_key]=smo
@@ -236,8 +239,32 @@ def get_dataset_matrix_hash(the_path, start_with_numbers):
 if __name__ == '__main__':
     from minitest import *
 
-    font_result_path = '../../resource/digit_recognition/font_training_result'
-    hand_result_path = '../../resource/digit_recognition/hand_training_result'
+    font_result_path = '../../other_resource/font_training_result'
+    hand_result_path = '../../other_resource/hand_training_result'
+
+    # font_training_path = '../../../codes/python/projects/font_number_binary/number_images'
+    font_training_path = '../../other_resource/font_training'
+
+    # hand_training_path = '../../../codes/python/ml/k_nearest_neighbours/training_digits'
+    # hand_testing_path = '../../../codes/python/ml/k_nearest_neighbours/test_digits'
+    hand_training_path = '../../other_resource/hand_training'
+    hand_testing_path = '../../other_resource/hand_testing'
+
+    def show_number_matrix(number_matrix):
+        from picture_sudoku.helpers import numpy_helper
+        from picture_sudoku.cv2_helpers.display import Display
+        from picture_sudoku.cv2_helpers.image import Image
+        binary_number_image = number_matrix.reshape((IMG_SIZE, IMG_SIZE))
+        number_image = numpy_helper.transfer_values_quickly(binary_number_image, {1:255})
+        number_image = numpy.array(number_image, dtype=numpy.uint8)
+        # Image.save_to_txt(number_image,'test1.dataset')
+        Display.image(number_image)
+
+if __name__ == '__main__':
+    from minitest import *
+
+    font_result_path = '../../other_resource/font_training_result'
+    hand_result_path = '../../other_resource/hand_training_result'
 
     # font_training_path = '../../../codes/python/projects/font_number_binary/number_images'
     font_training_path = '../../other_resource/font_training'
@@ -261,12 +288,13 @@ if __name__ == '__main__':
         arg_exp = 20
 
         # dataset_matrix_hash = get_dataset_matrix_hash(training_pic_path, range(2))
-        dataset_matrix_hash = get_dataset_matrix_hash(font_training_path, range(10))
+        # dataset_matrix_hash = get_dataset_matrix_hash(font_training_path, range(1,10))
+        # dataset_matrix_hash = get_dataset_matrix_hash(font_training_path, [0,1])
         # dataset_matrix_hash = get_dataset_matrix_hash(hand_training_path, range(10))
         # dataset_matrix_hash = get_dataset_matrix_hash(training_pic_path, (9,))
         # dataset_matrix_hash.pp()
 
-        mb = MultipleSvm.train_and_save_variables(Smo, dataset_matrix_hash, 200, 0.0001, 1000, arg_exp, font_result_path)
+        # mb = MultipleSvm.train_and_save_variables(Smo, dataset_matrix_hash, 200, 0.0001, 1000, arg_exp, font_result_path)
         # mb = MultipleSvm.load_variables(Smo, 'font_dataset')
         # mb = MultipleSvm.load_variables(Smo, hand_result_path)
 
@@ -279,6 +307,11 @@ if __name__ == '__main__':
         # mb.test(data_matrix,label_matrix).pp()
         # training_digits
         # {'error_count': 38, 'error_ratio %': 4.02, 'row_count': 946}
+        pass
+
+
+    with test("test_multi"):
+        test_multi()
         pass
 
 

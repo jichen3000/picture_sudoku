@@ -11,6 +11,17 @@ def transfer_values(arr, rule_hash):
             result[i,j] = rule_hash[value]
     return result
 
+def transfer_valueszz(arr, rule_hash):
+    '''
+        rule_hash = {0:1, 255:0}
+    '''
+    # result = arr.copy()
+    result = arr
+    for (i, j), value in numpy.ndenumerate(result):
+        if value in rule_hash.keys():
+            result[i,j] = rule_hash[value]
+    return result
+
 def transfer_values_quickly(arr, rule_hash):
     '''
         rule_hash = {0:1, 255:0}
@@ -41,6 +52,7 @@ def is_array_none(the_array):
 
 if __name__ == '__main__':
     from minitest import *
+    inject(numpy.allclose, 'must_close')
 
     with test("transfer_values"):
         arr = numpy.array([[1, 1, 1, 0, 1, 1, 1],
@@ -48,6 +60,33 @@ if __name__ == '__main__':
         transfer_values(arr, {0:1, 1:0}).must_equal(
             numpy.array([[0, 0, 0, 1, 0, 0, 0],
                          [0, 0, 0, 1, 0, 0, 0]]), numpy.allclose)
+
+        arr = numpy.array([[1, 1, 1, 2, 1, 1, 1],
+                     [1, 1, 1, 2, 1, 1, 1]])
+        transfer_values(arr, {1: -1, 2: 1}).must_close(
+            numpy.array([[-1, -1, -1,  1, -1, -1, -1],
+                         [-1, -1, -1,  1, -1, -1, -1]]))
+        arr = numpy.array([[1, 1, 1, 2, 1, 1, 1],
+                     [1, 1, 1, 2, 1, 1, 1]])
+        transfer_values(arr, {2: 1, 1: -1}).must_close(
+            numpy.array([[-1, -1, -1,  1, -1, -1, -1],
+                         [-1, -1, -1,  1, -1, -1, -1]]))
+
+        arr = numpy.array([[1, 1, 1, 2, 1, 1, 1],
+                     [1, 1, 1, 2, 1, 1, 1]])
+        reversed_arr = transfer_values(arr, {2: 1, 1: -1})
+        reversed_arr.ppl()
+        reversed_transfer_hash = {-1: 1, 1: 2}
+        transfer_values(reversed_arr, reversed_transfer_hash).must_close(
+            numpy.array([[1, 1, 1, 2, 1, 1, 1],
+                     [1, 1, 1, 2, 1, 1, 1]]))
+
+        # notice the issue
+        # arr = numpy.array([[1, 1, 1, 2, 1, 1, 1],
+        #              [1, 1, 1, 2, 1, 1, 1]])
+        # transfer_values_quickly(arr, {1: -1, 2: 1}).must_close(
+        #     numpy.array([[-1, -1, -1,  -1, -1, -1, -1],
+        #                  [-1, -1, -1,  -1, -1, -1, -1]]))
 
     with test("transfer_values_quickly"):
         arr = numpy.array([[1, 9],

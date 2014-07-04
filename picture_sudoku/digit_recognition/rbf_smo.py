@@ -278,9 +278,9 @@ class Smo(object):
 
         return cls(selected_data_matrix, selected_alphas_label_matrix, b, arg_exp, transfer_hash)
 
-    selected_data_matrix_name = 'selected_data_matrix.dataset'+'.npy'
-    selected_alphas_label_matrix_name = 'selected_alphas_label_matrix.dataset'+'.npy'
-    other_variables_name = 'other_variables.dataset'
+    selected_data_matrix_name = 'selected_data_matrix.finaldata'+'.npy'
+    selected_alphas_label_matrix_name = 'selected_alphas_label_matrix.finaldata'+'.npy'
+    other_variables_name = 'other_variables.finaldata'
 
     @classmethod
     def get_file_paths(cls, data_path, prefix):

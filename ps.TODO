@@ -9,6 +9,7 @@
  ☐ fix bug: when I upload 5 times, it would not work again. it's not the issue of web app. 
  ☐ website cannot handle big picture.
  ☐ fix the path issue, in web_app.py and main_sudoku.py
+ ☐ issue: when generating 1,0, the error reate will up over 50%. in rbf_smo, multiple_svm, generator.
 
 
  
