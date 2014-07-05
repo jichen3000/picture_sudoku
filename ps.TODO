@@ -2,7 +2,7 @@
  ☐ create ios app to give the sudoku answer.
  ☐ support unicode, so it can show Chinese properly.
 
- ☐ set web site on independent machine, so I can test android app on my phone.
+ ✔ set web site on independent machine, so I can test android app on my phone. @done (14-07-05 09:39)
  ☐ check web app live, before uploading 
  ☐ add exit button 
  ☐ support Chinese 
