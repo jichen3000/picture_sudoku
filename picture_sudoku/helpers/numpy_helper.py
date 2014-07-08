@@ -11,17 +11,6 @@ def transfer_values(arr, rule_hash):
             result[i,j] = rule_hash[value]
     return result
 
-def transfer_valueszz(arr, rule_hash):
-    '''
-        rule_hash = {0:1, 255:0}
-    '''
-    # result = arr.copy()
-    result = arr
-    for (i, j), value in numpy.ndenumerate(result):
-        if value in rule_hash.keys():
-            result[i,j] = rule_hash[value]
-    return result
-
 def transfer_values_quickly(arr, rule_hash):
     '''
         rule_hash = {0:1, 255:0}

@@ -12,12 +12,14 @@ from picture_sudoku.digit_recognition.rbf_smo import Smo
 from picture_sudoku.picture_analyzer import main_analyzer
 
 from picture_sudoku.answer import main_answer
+from picture_sudoku.helpers.common import Resource, OtherResource
 
 IMG_SIZE = 32
 FULL_SIZE = 1024
 
 # FONT_RESULT_PATH = 'resource/digit_recognition/font_training_result'
-FONT_RESULT_PATH = 'other_resource/font_training_result'
+# FONT_RESULT_PATH = 'other_resource/font_training_result'
+FONT_RESULT_PATH = OtherResource.get_path('font_training_result')
 
 STATUS_SUCCESS = "SUCCESS"
 STATUS_FAILURE = "FAILURE"
@@ -57,6 +59,11 @@ def transfer_to_digit_matrix(the_ragion):
     heighted_ragion = Image.resize_keeping_ratio_by_height(the_ragion, IMG_SIZE)
     standard_ragion = Ragion.fill(heighted_ragion,(IMG_SIZE,IMG_SIZE))
     return numpy.matrix(standard_ragion.reshape(1, FULL_SIZE))
+
+def resize_to_cell_size(the_ragion):
+    heighted_ragion = Image.resize_keeping_ratio_by_height(the_ragion, IMG_SIZE)
+    standard_ragion = Ragion.fill(heighted_ragion,(IMG_SIZE,IMG_SIZE))
+    return standard_ragion
 
 # def answer_quiz_with_pic(pic_file_path):
 #     try:

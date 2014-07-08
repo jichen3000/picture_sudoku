@@ -104,6 +104,9 @@ def save_upload_file(upload_obj):
 #     from minitest import *
     # print "http://localhost:9996"
 
-app_port = sys.argv[1] if len(sys.argv) > 1 else 9996
-run(host='0.0.0.0', port=app_port)
-# run(host='localhost', port=9996, reloader=True)
+if len(sys.argv) > 1:
+    app_port = sys.argv[1]    
+    run(host='0.0.0.0', port=app_port)
+else:
+    run(host='localhost', port=5000, reloader=True)
+    # run(host='192.168.11.4', port=5000, reloader=True)

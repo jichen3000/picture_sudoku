@@ -3,6 +3,7 @@ import numpy
 
 from rect import Rect
 from ragion import Ragions
+from picture_sudoku.helpers import numpy_helper
 
 BLACK = 0
 WHITE = 255
@@ -20,6 +21,11 @@ class Display(object):
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    @staticmethod
+    def image_binary(the_image, image_name='image'):        
+        Display.image(numpy_helper.transfer_values_quickly(
+            the_image,{1:255}))
+        
     @staticmethod
     def images(images, image_name='image'):
         dx = 0
@@ -73,6 +79,15 @@ class Display(object):
         same_size_ragions = Ragions.fill_to_same_size(ragions)
         count_in_row = min(len(ragions), count_in_row)
         Display.same_size_ragions(same_size_ragions, count_in_row, init_value)
+
+    @staticmethod
+    def ragions_binary(ragions, count_in_row=9, init_value=BLACK):
+        '''
+            Show the ragions which could have different size.
+        '''
+        transfered_ragions = [numpy_helper.transfer_values_quickly(ragion,{1:255}) 
+            for ragion in ragions]
+        Display.ragions(transfered_ragions)
 
     @staticmethod
     def polar_lines(the_image, lines):

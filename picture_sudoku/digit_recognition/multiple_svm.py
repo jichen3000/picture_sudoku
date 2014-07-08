@@ -235,31 +235,6 @@ def get_dataset_matrix_hash(the_path, start_with_numbers):
 
 
 
-
-if __name__ == '__main__':
-    from minitest import *
-
-    font_result_path = '../../other_resource/font_training_result'
-    hand_result_path = '../../other_resource/hand_training_result'
-
-    # font_training_path = '../../../codes/python/projects/font_number_binary/number_images'
-    font_training_path = '../../other_resource/font_training'
-
-    # hand_training_path = '../../../codes/python/ml/k_nearest_neighbours/training_digits'
-    # hand_testing_path = '../../../codes/python/ml/k_nearest_neighbours/test_digits'
-    hand_training_path = '../../other_resource/hand_training'
-    hand_testing_path = '../../other_resource/hand_testing'
-
-    def show_number_matrix(number_matrix):
-        from picture_sudoku.helpers import numpy_helper
-        from picture_sudoku.cv2_helpers.display import Display
-        from picture_sudoku.cv2_helpers.image import Image
-        binary_number_image = number_matrix.reshape((IMG_SIZE, IMG_SIZE))
-        number_image = numpy_helper.transfer_values_quickly(binary_number_image, {1:255})
-        number_image = numpy.array(number_image, dtype=numpy.uint8)
-        # Image.save_to_txt(number_image,'test1.dataset')
-        Display.image(number_image)
-
 if __name__ == '__main__':
     from minitest import *
 

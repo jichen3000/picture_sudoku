@@ -5,6 +5,8 @@ import operator
 from picture_sudoku.helpers import numpy_helper
 from picture_sudoku.helpers import list_helper
 
+from picture_sudoku.helpers.exceptions import SudokuError
+
 from picture_sudoku.cv2_helpers.image import Image
 from picture_sudoku.cv2_helpers.ragion import Ragion
 from picture_sudoku.cv2_helpers.ragion import Ragions
@@ -23,7 +25,12 @@ WHITE = 255
 
 SUDOKU_SIZE = 9
 
-__all__ = ['extract_number_ragions']
+__all__ = ['extract_number_ragions', 'extract_specified_number_ragion']
+
+def extract_specified_number_ragion(image_path, x, y):
+    number_indexs, number_ragions = extract_number_ragions(image_path)
+    specified_number_index = (y * SUDOKU_SIZE + x)
+    return number_ragions[number_indexs.index(specified_number_index)]
 
 def extract_number_ragions(image_path):
     '''
@@ -36,7 +43,12 @@ def extract_number_ragions(image_path):
     square_ragion = find_square_ragion(gray_image)
 
     vertical_lines = find_vertical_lines(square_ragion)
+    if len(vertical_lines) > SUDOKU_SIZE + 1:
+        raise SudokuError("The count of vertical_lines is larger than {0}".format(SUDOKU_SIZE))
+
     horizontal_lines = find_horizontal_lines(square_ragion)
+    if len(horizontal_lines) > SUDOKU_SIZE + 1:
+        raise SudokuError("The count of horizontal_lines is larger than {0}".format(SUDOKU_SIZE))
     # Display.polar_lines(square_ragion, vertical_lines+horizontal_lines)
 
     intersections = find_intersections(vertical_lines, horizontal_lines)
@@ -61,6 +73,10 @@ def extract_number_ragions(image_path):
 
 
 def find_square_ragion(gray_image):
+    # for some big size pictures which need to blur,
+    # but cannot using ksize=(5,5), since some picture will get wrong number value.
+    gray_image = cv2.GaussianBlur(gray_image, ksize=(3,3), sigmaX=0)
+
     threshed_image = cv2.adaptiveThreshold(gray_image,WHITE,
         cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
 
@@ -68,8 +84,13 @@ def find_square_ragion(gray_image):
         It's very depend on the threshed_image.
     '''
     max_contour = find_max_contour(threshed_image)
+    # from picture_sudoku.cv2_helpers.display import Display
+    # Display.contours(gray_image, [max_contour])
     square_contour = convert_to_square(max_contour)
 
+    if square_contour == None:
+        raise SudokuError("Cannot find sudoku square!")
+    # from picture_sudoku.cv2_helpers.display import Display
     # Display.contours(gray_image, [square_contour])
 
     larged_contour = Quadrilateral.enlarge(square_contour, 0.007)
@@ -137,15 +158,17 @@ def find_horizontal_lines(gray_image):
     lines = filter(filter_line, lines)
     # lines.ppl()
 
-    # show_lines(cannied_image, lines)
+    # Display.polar_lines(cannied_image, lines)
 
     accuracy_pixs = gray_image.shape[0] / SUDOKU_SIZE *0.3 # 9
     line_count = SUDOKU_SIZE+1
 
     catalogued_lines = PolarLines.catalogue_lines(lines, accuracy_pixs)
     mean_lines = PolarLines.cal_mean_lines(catalogued_lines)
+    # mean_lines.ppl()
+    # Display.polar_lines(cannied_image, mean_lines)
     all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
-    # show_lines(cannied_image, all_lines)
+    # Display.polar_lines(cannied_image, all_lines)
 
     return all_lines
 
@@ -198,6 +221,8 @@ def analyze_cell_ragions(cell_ragions):
 def find_max_contour(threshed_image, filter_func = None, accuracy_percent_with_perimeter=0.0001):
     contours = Image.find_contours(
         threshed_image, filter_func, accuracy_percent_with_perimeter)
+    # from picture_sudoku.cv2_helpers.display import Display
+    # Display.contours(threshed_image, contours)
     if len(contours) == 0:
         return None
     contour_area_arr = [cv2.contourArea(i) for i in contours]
@@ -244,21 +269,29 @@ if __name__ == '__main__':
         Display.ragions([square_ragion, all_number_ragion])
 
     with test(extract_number_ragions):
-        # image_path = '../../resource/example_pics/sample07.dataset.jpg'
-        # number_indexs, number_ragions = extract_number_ragions(image_path)
+        image_path = '../../resource/example_pics/sample07.dataset.jpg'
+        # gray_image = cv2.imread(image_path, 0)
+        # Display.image(gray_image)
+
+        number_indexs, number_ragions = extract_number_ragions(image_path)
+        number_indexs.must_equal((0, 1, 5, 7, 8, 9, 10, 16, 17, 30, 32, 36, 37, 
+            39, 41, 43, 44, 48, 50, 63, 64, 70, 71, 72, 73, 75, 77, 79, 80))
         # number_indexs.must_equal((0, 1, 3, 7, 8, 9, 10, 16, 17, 30, 32, 
         #     36, 37, 39, 41, 43, 44, 48, 50, 63, 64, 70, 71, 72, 73, 75, 77, 79, 80))
-        # number_ragions.size().must_equal(29)
+        number_ragions.size().must_equal(29)
 
         # image_path = '../../resource/example_pics/sample07.dataset.jpg'
         # number_indexs, number_ragions = extract_number_ragions(image_path)
-        image_path = '../../resource/example_pics/sample15.dataset.png'
-        number_indexs, number_ragions = extract_number_ragions(image_path)
+
+
+        # image_path = '../../resource/example_pics/sample15.dataset.png'
+        # number_indexs, number_ragions = extract_number_ragions(image_path)
         # for i in range(1,15):
         #     pic_file_path = '../../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.jpg'
         #     pic_file_path.ppl()
         #     extract_number_ragions(pic_file_path)
         pass
+
 
 
 

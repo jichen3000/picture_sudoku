@@ -55,8 +55,8 @@ $(function() {
     // check if the browser support
     disableImageResize: /Android(?!.*Chrome)|Opera/
         .test(window.navigator && navigator.userAgent),
-    imageMaxWidth: 700,
-    imageMaxHeight: 700,
+    imageMaxWidth: 1200,
+    imageMaxHeight: 1200,
     // imageCrop: true, // Force cropped images
     imageForceResize: true, // resize images
     previewMaxWidth: 640,

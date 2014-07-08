@@ -62,7 +62,8 @@ class PolarLines(object):
         if len(lines) >= line_count:
             return lines
         first_line = lines[0]
-        step = (lines[-1][0] - first_line[0]) / float(line_count)
+        step = (lines[-1][0] - first_line[0]) / float(line_count-1)
+        # step.ppl()
         all_lines = [first_line]
         pre_index = 0
         pre_line = first_line
@@ -101,6 +102,7 @@ class PolarLines(object):
         return (line[1] * 180/ numpy.pi)
 
 if __name__ == '__main__':
+    from picture_sudoku.cv2_helpers.display import Display
     from minitest import *
     inject(numpy.allclose, 'must_close')
 
@@ -166,6 +168,16 @@ if __name__ == '__main__':
         all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
         # all_lines.ppl()
         all_lines.size().must_equal(SUDOKU_SIZE+1)
+
+        mean_lines =[numpy.array([ 3.5       ,  1.57079637]),
+                     numpy.array([ 102.54545593,    1.57555628]),
+                     numpy.array([ 196.        ,    1.57603228]),
+                     numpy.array([ 284.8888855 ,    1.57661402])]
+
+        all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
+        # all_lines.ppl()
+        all_lines.size().must_equal(SUDOKU_SIZE+1)
+
 
     with test("PolarLines.cal_intersection"):
         line1 = numpy.array([ 1      ,   0])
