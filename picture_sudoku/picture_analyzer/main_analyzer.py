@@ -14,6 +14,7 @@ from picture_sudoku.cv2_helpers.rect import Rect
 from picture_sudoku.cv2_helpers.contour import Contour
 from picture_sudoku.cv2_helpers.quadrilateral import Quadrilateral
 from picture_sudoku.cv2_helpers.points import Points
+from picture_sudoku.cv2_helpers.display import Display
 
 
 from polar_lines import PolarLines
@@ -42,11 +43,11 @@ def extract_number_ragions(image_path):
 
     square_ragion = find_square_ragion(gray_image)
 
-    vertical_lines = find_vertical_lines(square_ragion)
+    vertical_lines = find_sudoku_vertical_lines(square_ragion)
     if len(vertical_lines) > SUDOKU_SIZE + 1:
         raise SudokuError("The count of vertical_lines is larger than {0}".format(SUDOKU_SIZE))
 
-    horizontal_lines = find_horizontal_lines(square_ragion)
+    horizontal_lines = find_sudoku_horizontal_lines(square_ragion)
     if len(horizontal_lines) > SUDOKU_SIZE + 1:
         raise SudokuError("The count of horizontal_lines is larger than {0}".format(SUDOKU_SIZE))
     # Display.polar_lines(square_ragion, vertical_lines+horizontal_lines)
@@ -54,6 +55,7 @@ def extract_number_ragions(image_path):
     intersections = find_intersections(vertical_lines, horizontal_lines)
 
     cell_ragions = split_cell_ragion(intersections,square_ragion)
+    # Display.ragions(cell_ragions)
 
     index_and_number_ragions = analyze_cell_ragions(cell_ragions)
 
@@ -75,18 +77,27 @@ def extract_number_ragions(image_path):
 def find_square_ragion(gray_image):
     # for some big size pictures which need to blur,
     # but cannot using ksize=(5,5), since some picture will get wrong number value.
-    gray_image = cv2.GaussianBlur(gray_image, ksize=(3,3), sigmaX=0)
+    blured_image = cv2.GaussianBlur(gray_image, ksize=(3,3), sigmaX=0)
 
-    threshed_image = cv2.adaptiveThreshold(gray_image,WHITE,
+    threshed_image = cv2.adaptiveThreshold(blured_image,WHITE,
         cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
+
+    # from picture_sudoku.cv2_helpers.display import Display
+    # Display.image(threshed_image)
 
     ''' 
         It's very depend on the threshed_image.
     '''
     max_contour = find_max_contour(threshed_image)
-    # from picture_sudoku.cv2_helpers.display import Display
+
     # Display.contours(gray_image, [max_contour])
-    square_contour = convert_to_square(max_contour)
+    # max_contour.ppl()
+    # 'test'.pl()
+    # from picture_sudoku.helpers.common import Resource
+    # numpy.save(Resource.get_path("for_issues/max_contour.npy"), max_contour)
+    # square_contour = convert_to_square(max_contour)
+    square_contour = extract_square_from_contour(max_contour)
+    # square_contour.ppl()
 
     if square_contour == None:
         raise SudokuError("Cannot find sudoku square!")
@@ -94,14 +105,39 @@ def find_square_ragion(gray_image):
     # Display.contours(gray_image, [square_contour])
 
     larged_contour = Quadrilateral.enlarge(square_contour, 0.007)
+    larged_contour = Contour.check_beyond_borders(larged_contour, gray_image.shape)
+    # from picture_sudoku.cv2_helpers.display import Display
+    # Display.contours(gray_image, [larged_contour])
+    # larged_contour.ppl()
 
     square_ragion = Contour.get_rect_ragion(larged_contour, gray_image)
     # Display.image(square_ragion)
 
     return square_ragion
 
-def find_vertical_lines(gray_image):
+def find_sudoku_vertical_lines(gray_image):
     gray_image = cv2.GaussianBlur(gray_image,ksize=(5,5), sigmaX=0)
+
+    mean_lines = find_vertical_lines(gray_image)
+
+    all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
+    # show_lines(cannied_image, all_lines)
+
+    return all_lines
+
+
+def find_sudoku_horizontal_lines(gray_image):
+    gray_image = cv2.GaussianBlur(gray_image,ksize=(5,5), sigmaX=0)
+
+    mean_lines = find_horizontal_lines(gray_image)
+
+    all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
+    # Display.polar_lines(cannied_image, all_lines)
+
+    return all_lines
+
+def find_vertical_lines(gray_image):
+    # gray_image = cv2.GaussianBlur(gray_image,ksize=(5,5), sigmaX=0)
     # let the horizen lines dispear
     dx_image = cv2.Sobel(gray_image,cv2.CV_16S,2,0)
     # convert from dtype=int16 to dtype=uint8
@@ -133,14 +169,15 @@ def find_vertical_lines(gray_image):
     accuracy_pixs = gray_image.shape[1] / SUDOKU_SIZE *0.3 # 9
     catalogued_lines = PolarLines.catalogue_lines(lines, accuracy_pixs)
     mean_lines = PolarLines.cal_mean_lines(catalogued_lines)
-    all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
+    # all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
     # show_lines(cannied_image, all_lines)
 
-    return all_lines
+    return mean_lines
+
 
 
 def find_horizontal_lines(gray_image):
-    gray_image = cv2.GaussianBlur(gray_image,ksize=(5,5), sigmaX=0)
+    # gray_image = cv2.GaussianBlur(gray_image,ksize=(5,5), sigmaX=0)
 
     dy_image = cv2.Sobel(gray_image,cv2.CV_16S,0,2)
     # convert from dtype=int16 to dtype=uint8
@@ -156,21 +193,45 @@ def find_horizontal_lines(gray_image):
         theta_degree = (theta * 180/ numpy.pi) - 90
         return abs(theta_degree) < 10
     lines = filter(filter_line, lines)
-    # lines.ppl()
-
-    # Display.polar_lines(cannied_image, lines)
-
     accuracy_pixs = gray_image.shape[0] / SUDOKU_SIZE *0.3 # 9
-    line_count = SUDOKU_SIZE+1
 
     catalogued_lines = PolarLines.catalogue_lines(lines, accuracy_pixs)
     mean_lines = PolarLines.cal_mean_lines(catalogued_lines)
-    # mean_lines.ppl()
-    # Display.polar_lines(cannied_image, mean_lines)
-    all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
-    # Display.polar_lines(cannied_image, all_lines)
+    return mean_lines
 
-    return all_lines
+
+def extract_square_from_contour(contour):
+    '''
+        it will extract square from the contour which could have many noise points.
+    '''
+    the_image = Image.generate_mask(Contour.get_shape(contour))
+    # Display.contours(the_image, [contour])
+    cv2.drawContours(the_image, [contour], -1, 255 ,1)
+    # Display.image(the_image)
+    # lines = PolarLines.find_suitable_lines(the_image)
+    square_ragion = the_image
+    vertical_lines = find_vertical_lines(square_ragion)
+    border_line_count = 2
+    if len(vertical_lines) > border_line_count:
+        raise SudokuError("The count of vertical border lines is larger than {0}"
+            .format(border_line_count))
+
+    horizontal_lines = find_horizontal_lines(square_ragion)
+    if len(horizontal_lines) > border_line_count:
+        raise SudokuError("The count of horizontal border lines is larger than {0}"
+            .format(border_line_count))
+    # Display.polar_lines(square_ragion, vertical_lines+horizontal_lines)
+    # Display.polar_lines(square_ragion, horizontal_lines)
+
+    intersections = find_intersections(vertical_lines, horizontal_lines)
+    # intersections.ppl()
+    square_contour =  Points.to_contour(intersections)
+    # order the points
+    square_contour = Points.to_contour(Quadrilateral.vertices(square_contour))
+    # 'test'.pl()
+    # Display.contours(the_image,[square_contour])
+    return square_contour
+
 
 def find_intersections(vertical_lines, horizontal_lines):
 
@@ -197,12 +258,14 @@ def split_cell_ragion(intersections, square_ragion):
     get_ragion_func = lambda c: Contour.get_rect_ragion(c, threshed_square_ragion)
     cell_ragions = map(get_ragion_func,  cell_contours)
     def adjust_one(the_ragion):
-        # blured_ragion = cv2.GaussianBlur(the_ragion, ksize=(5,5), sigmaX=0)
-        # threshed_square_ragion = cv2.adaptiveThreshold(blured_ragion,WHITE,
-        #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=3, C=3)
-        threshed_square_ragion = Image.threshold_white_with_mean_percent(the_ragion)
+        # blured_ragion = cv2.GaussianBlur(the_ragion, ksize=(3,3), sigmaX=0)
+        # threshed_square_ragion = cv2.adaptiveThreshold(the_ragion,WHITE,
+        #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
+        threshed_square_ragion = Image.threshold_white_with_mean_percent(the_ragion, 0.5)
         return threshed_square_ragion
     cell_ragions = map(adjust_one, cell_ragions)
+    # 'test'.pl()
+    # Display.ragions(cell_ragions)
     return cell_ragions
 
 def analyze_cell_ragions(cell_ragions):
@@ -238,35 +301,46 @@ def get_approximated_contour(contour, accuracy_percent_with_perimeter=0.0001):
 
 
 def convert_to_square(contour):
+    # from picture_sudoku.cv2_helpers.display import Display
+    # the_image = Image.generate_mask((1000, 1000))
+    # Display.contours(the_image, [contour])
     for i in reversed(range(1,10)):
         result = get_approximated_contour(contour, 0.01*i)
+        # the_image = Image.generate_mask((1000, 1000))
+        # Display.contours(the_image, [result])
         # i.pl()
         # len(result).pl()
         if len(result)==4:
             return result
     return None
 
+def show_all(square_ragion, index_and_number_ragions):
+    '''
+        just for test
+    '''
+    all_number_ragion = []
+    for index, number_ragion in index_and_number_ragions:
+        ragion_index = len(all_number_ragion)
+        if ragion_index < index:
+            all_number_ragion += [numpy.zeros((1,1)) for i in range(index-ragion_index)]            
+        all_number_ragion.append(number_ragion)
+    all_number_ragion = Ragions.join_same_size(
+        Ragions.fill_to_same_size(all_number_ragion), 9)
+    from picture_sudoku.cv2_helpers.display import Display
+    Display.ragions([square_ragion, all_number_ragion])
 
 
 if __name__ == '__main__':
     from minitest import *
     from picture_sudoku.cv2_helpers.display import Display
 
+    inject(numpy.allclose, 'must_close')
+
     def save_dataset(gray_image, file_name):
         file_path = '../../resource/test/' + file_name
         transfered_image = numpy_helper.transfer_values_quickly(gray_image,{255:1})
         return Image.save_to_txt(transfered_image,file_path)
 
-    def show_all(square_ragion, index_and_number_ragions):
-        all_number_ragion = []
-        for index, number_ragion in index_and_number_ragions:
-            ragion_index = len(all_number_ragion)
-            if ragion_index < index:
-                all_number_ragion += [numpy.zeros((1,1)) for i in range(index-ragion_index)]            
-            all_number_ragion.append(number_ragion)
-        all_number_ragion = Ragions.join_same_size(
-            Ragions.fill_to_same_size(all_number_ragion), 9)
-        Display.ragions([square_ragion, all_number_ragion])
 
     with test(extract_number_ragions):
         image_path = '../../resource/example_pics/sample07.dataset.jpg'
@@ -292,6 +366,13 @@ if __name__ == '__main__':
         #     extract_number_ragions(pic_file_path)
         pass
 
+    with test(extract_square_from_contour):
+        contour = numpy.load("../../resource/test/max_contour_with_noises.npy")
+        extract_square_from_contour(contour).must_close(
+            numpy.array(  [[[ 57, 202]],
+                           [[ 75, 455]],
+                           [[314, 456]],
+                           [[332, 204]]]))
 
 
 

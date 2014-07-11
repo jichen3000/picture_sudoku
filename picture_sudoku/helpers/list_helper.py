@@ -17,6 +17,10 @@ def cal_difference(the_list1, the_list2):
     return tuple((index, cur1, cur2) for index, (cur1, cur2) 
         in enumerate(zip(the_list1, the_list2)) if cur1!=cur2)
         
+def adjust_in_range(the_value, start_value, end_value):
+    adjusted_value = max(the_value, start_value)
+    adjusted_value = min(adjusted_value, end_value)
+    return adjusted_value
 
 
 if __name__ == '__main__':
@@ -33,3 +37,10 @@ if __name__ == '__main__':
         the_list2 = (1,2,5,4,7,6)
         cal_difference(the_list1, the_list2).must_equal(
             ((2, 3, 5), (4, 5, 7)))
+
+    with test(adjust_in_range):
+        adjust_in_range(the_value=4, start_value=0, end_value=10).must_equal(4)
+        adjust_in_range(the_value=0, start_value=0, end_value=10).must_equal(0)
+        adjust_in_range(the_value=10, start_value=0, end_value=10).must_equal(10)
+        adjust_in_range(the_value=-1, start_value=0, end_value=10).must_equal(0)
+        adjust_in_range(the_value=11, start_value=0, end_value=10).must_equal(10)

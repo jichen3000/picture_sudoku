@@ -11,6 +11,7 @@ class Image(object):
     '''
         notice: in an image, using image[y,x] to get the value of point (x,y).
         The order is reversed with point.
+        height, width = the_image.shape
     '''
     @staticmethod
     def centroid(the_image):
@@ -52,8 +53,28 @@ class Image(object):
         return (y_indexs.size>0 or x_indexs.size>0)
 
     @staticmethod
-    def save_to_txt(the_image, file_name):
-        return numpy.savetxt(file_name, the_image, fmt='%d', delimiter='')
+    def save_to_txt(the_image, file_path):
+        '''
+            for gray image, actually, if you want use load_from_txt, it should be binary image.
+        '''
+        return numpy.savetxt(file_path, the_image, fmt='%d', delimiter='')
+
+    @staticmethod
+    def load_from_txt(file_path):
+        '''
+            get image from txt file.
+        '''
+        line_list_list = []
+        with open(file_path) as data_file:
+            for line in data_file:
+                striped_line = line.strip()
+                if len(striped_line):
+                    line_list = [int(cur_str) for cur_str in striped_line]
+                    line_list_list.append(line_list)
+        height = len(line_list_list)
+        width = len(line_list_list[0])
+        return numpy.array(line_list_list, numpy.uint8).reshape((height, width))
+
 
 
     @staticmethod
@@ -108,19 +129,6 @@ class Image(object):
         return threshed_image
 
     @staticmethod
-    def read_from_number_file(file_path):
-        line_list_list = []
-        with open(file_path) as data_file:
-            for line in data_file:
-                striped_line = line.strip()
-                if len(striped_line):
-                    line_list = [int(cur_str) for cur_str in striped_line]
-                    line_list_list.append(line_list)
-        height = len(line_list_list)
-        width = len(line_list_list[0])
-        return numpy.array(line_list_list, numpy.uint8).reshape((height, width))
-
-    @staticmethod
     def colorize(the_image):
         return cv2.cvtColor(the_image, cv2.COLOR_GRAY2BGR)
 
@@ -130,43 +138,57 @@ if __name__ == '__main__':
     from display import Display
     from picture_sudoku.helpers import numpy_helper
 
+    inject(numpy.allclose, 'must_close')
+
 
     ORIGINAL_IMAGE_NAME = '../../resource/example_pics/sample01.dataset.jpg'
     gray_pic = cv2.imread(ORIGINAL_IMAGE_NAME, 0)
     color_pic = cv2.imread(ORIGINAL_IMAGE_NAME)
 
     small_number_path = '../../resource/test/small_number.dataset'
-    small_image = Image.read_from_number_file(small_number_path)
+    small_image = Image.load_from_txt(small_number_path)
 
 
+    with test(Image.save_to_txt):
+        binary_image_path = '../../resource/test/binary_image.npy'
+        binary_image = numpy.load(binary_image_path)
+        # binary_image.ppl()
 
-    with test("Image.read_from_number_file"):
+        txt_image_path = '../../resource/test/binary_image.dataset'
+        Image.save_to_txt(binary_image, txt_image_path)
+
+        loaded_binary_image = Image.load_from_txt(txt_image_path)
+        loaded_binary_image.must_close(binary_image)
+        # Display.binary_image(loaded_binary_image)
+        pass        
+
+    with test(Image.load_from_txt):
         small_image.shape.must_equal((32,32))
         numpy.count_nonzero(small_image).must_equal(110)
 
-    with test("Image.centroid"):
-        Image.centroid(gray_pic).must_equal((368, 653))
+    with test(Image.centroid):
+        Image.centroid(gray_pic).must_equal((276, 489))
 
-    with test("Image.clip_by_x_y_count"):
+    with test(Image.clip_by_x_y_count):
         arr = numpy.arange(81).reshape((9,9))
-        Image.clip_by_x_y_count(arr).must_equal(
+        Image.clip_by_x_y_count(arr).must_close(
             numpy.array(  [[20, 21, 22, 23, 24],
                            [29, 30, 31, 32, 33],
                            [38, 39, 40, 41, 42],
                            [47, 48, 49, 50, 51],
-                           [56, 57, 58, 59, 60]]), numpy.allclose)
+                           [56, 57, 58, 59, 60]]) )
 
-    with test("Image.clip_by_percent"):
+    with test(Image.clip_by_percent):
         arr = numpy.arange(81).reshape((9,9))
-        Image.clip_by_percent(arr, 0.2).must_equal(
+        Image.clip_by_percent(arr, 0.2).must_close(
             numpy.array(  [[20, 21, 22, 23, 24],
                            [29, 30, 31, 32, 33],
                            [38, 39, 40, 41, 42],
                            [47, 48, 49, 50, 51],
-                           [56, 57, 58, 59, 60]]), numpy.allclose)
+                           [56, 57, 58, 59, 60]]) )
 
 
-    with test("Image.cal_nonzero_rect"):
+    with test(Image.cal_nonzero_rect):
         cur_rect = Image.cal_nonzero_rect(small_image)
         cur_rect.must_equal((10, 9, 12, 18))
 
@@ -180,18 +202,16 @@ if __name__ == '__main__':
         # sub_image.pp()
 
 
-    with test("Image.cal_nonzero_rect_keeping_ratio"):
+    with test(Image.cal_nonzero_rect_keeping_ratio):
         Image.cal_nonzero_rect_keeping_ratio(small_image).must_equal((7, 9, 18, 18))
 
-    with test("Image.is_not_empty"):
+    with test(Image.is_not_empty):
         arr = numpy.zeros((3,3))
         Image.is_not_empty(arr).must_equal(False)
         arr[1,1] = 1 
         Image.is_not_empty(arr).must_equal(True)
 
-
-
-    with test("Image.fill_contours"):
+    with test(Image.fill_contours):
         mask = Image.generate_mask((600, 400))
         contour = numpy.array(
               [[[384, 225]],

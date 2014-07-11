@@ -62,6 +62,8 @@ class Quadrilateral(Contour):
 
 if __name__ == '__main__':
     from minitest import *
+    from display import Display
+    from image import Image
 
     with test("Quadrilateral.centroid"):
         contour = numpy.array(
@@ -107,7 +109,16 @@ if __name__ == '__main__':
 
         ''' show '''
         # the_image = Image.generate_mask((700, 500))
-        # Image.show_contours_with_color(the_image, [quadrilateral, enlarged_quadrilateral])
+        # Display.contours(the_image, [quadrilateral, enlarged_quadrilateral])
+
+    # with test("Quadrilateral.check_and_adjust"):
+    #     square_contour = numpy.array([[[  1, 118]],
+    #          [[ 76, 458]],
+    #          [[316, 455]],
+    #          [[332, 204]]], dtype=numpy.int32)
+    #     ''' show '''
+    #     the_image = Image.generate_mask((700, 500))
+    #     Display.contours(the_image, [square_contour])
 
     with test("Quadrilateral.vertices"):
         contour = numpy.array(

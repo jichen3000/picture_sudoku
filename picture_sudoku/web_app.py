@@ -1,8 +1,9 @@
 import os
 import sys
+import logging
 
-print "os.environ:",os.environ
-sys.stdout.flush()
+# print "os.environ:",os.environ
+# sys.stdout.flush()
 
 
 # just for heroku run
@@ -59,8 +60,9 @@ def save_upload_file(upload_obj):
 
     file_path = "{path}/{file}".format(path=save_path, file=upload_obj.filename)
     # file_path.ppl()
-    print "file_path:",os.path.abspath(file_path)
-    sys.stdout.flush()
+    logging.info("file_path : {0}".format(file_path))
+    # print "file_path:",os.path.abspath(file_path)
+    # sys.stdout.flush()
     if os.path.isfile(file_path):
         os.remove(file_path)
     upload_obj.save(file_path)
@@ -106,7 +108,11 @@ def save_upload_file(upload_obj):
 
 if len(sys.argv) > 1:
     app_port = sys.argv[1]    
+    logging.basicConfig(level=logging.INFO, 
+        filename='picture_sudoku.log', filemode='w',  format='%(levelname)s: %(message)s')
     run(host='0.0.0.0', port=app_port)
 else:
-    run(host='localhost', port=5000, reloader=True)
-    # run(host='192.168.11.4', port=5000, reloader=True)
+    # run(host='localhost', port=5000, reloader=True)
+    logging.basicConfig(level=logging.DEBUG, 
+        format='%(levelname)s: %(message)s')
+    run(host='192.168.11.4', port=5000, reloader=True)

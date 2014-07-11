@@ -21,8 +21,10 @@ class Display(object):
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    ragion = image
+
     @staticmethod
-    def image_binary(the_image, image_name='image'):        
+    def binary_image(the_image, image_name='image'):        
         Display.image(numpy_helper.transfer_values_quickly(
             the_image,{1:255}))
         

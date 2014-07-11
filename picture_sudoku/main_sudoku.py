@@ -33,10 +33,21 @@ ERROR_CANNOT_ANSWER = "Sorry, cannot answer it, since this puzzle may not follow
 
 def get_digits(image_path, som_svm, with_ragions=False):
     number_indexs, number_ragions = main_analyzer.extract_number_ragions(image_path)
+    # number_indexs.pl()
+    # from picture_sudoku.cv2_helpers.display import Display
+    # issue_ragion = number_ragions[number_indexs.index(30)]
+    # # Display.binary_image(issue_ragion)
+    # Image.save_to_txt(issue_ragion,Resource.get_path('test/binary_image_6_8_03.dataset'))
     # show_number_ragions(number_ragions)
+    # som_svm.dag_classify(transfer_to_digit_matrix(adjust_number_ragion(issue_ragion))).pl()
+    # Image.save_to_txt(adjust_number_ragion(issue_ragion), 
+    #     Resource.get_path('for_issues/binary_image_6_8_dd.dataset'))
     adjusted_number_ragions = map(adjust_number_ragion, number_ragions)
     number_matrixs = map(transfer_to_digit_matrix, adjusted_number_ragions)
+    # it remove the adjusted_number_ragions
+    # number_matrixs = map(transfer_to_digit_matrix, number_ragions)
     digits = map(som_svm.dag_classify, number_matrixs)
+    # digits.pl()
     digits = tuple(digits)
     if with_ragions:
         return number_indexs, digits, number_ragions

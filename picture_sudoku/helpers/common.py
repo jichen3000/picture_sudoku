@@ -1,6 +1,8 @@
+'''
+from picture_sudoku.helpers.common import Resource, OtherResource
+'''
+
 import os
-
-
 
 class Resource(object):
     resource_relative_path = '../../resource'
