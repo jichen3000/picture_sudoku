@@ -6,23 +6,23 @@
  ☐ fix bug: when I upload 5 times, it would not work again. it's not the issue of web app. 
  ☐ website cannot handle big picture.
  ☐ fix the path issue, in web_app.py and main_sudoku.py
- ☐ issue: when generating 1,0, the error reate will up over 50%. in rbf_smo, multiple_svm, generator.
- ☐ issue: cannot handle all the pics uploaded by phone.
+ ☐ issue 10001: when generating 1,0, the error reate will up over 50%. in rbf_smo, multiple_svm, generator.
 
  
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ issue 10002: it will take some null ragion in sample16.dataset.jpg. Fixed, by raise the rate from 0.01 to 0.012 in has_enough_nonzeros method in nonzero_rect.py @done (14-07-13 14:29)
  ✔ create android app to give the sudoku answer. @done (14-07-05 11:39)
- ✔ set web site on independent machine, so I can test android app on my phone. @done (14-07-05 09:39)
  ✔ click back twice to exit @done (14-07-05 11:39)
- ✔ add progress when uploading @done (14-07-02 11:13)
- ✔ change app theme @done (14-07-02 11:30)
+ ✔ set web site on independent machine, so I can test android app on my phone. @done (14-07-05 09:39)
  ✔ crop pic size before upload @done (14-07-03 10:51)
+ ✔ change app theme @done (14-07-02 11:30)
+ ✔ add progress when uploading @done (14-07-02 11:13)
  ✔ fix bug: cannot handle other pictures without sudoku puzzle. @done (14-07-02 05:03)
- ✔ create a website which accept the sudoku pic, and give the sudoku puzzle, not give an answer. @done (14-05-17 07:57)
  ✔ ensmall the pic when upload to the server. @done (14-05-17 07:57)
+ ✔ create a website which accept the sudoku pic, and give the sudoku puzzle, not give an answer. @done (14-05-17 07:57)
  ✔ remove italic in font training, and test pics again @done (14-05-12 08:03)
  ✔ test the the numbers binary arrays by digital recongnition. @done (14-05-11 08:07)
  ✔ check the angle of square to decide which way to get the number rect @done (14-05-11 08:07)

@@ -58,6 +58,11 @@ class Display(object):
         rect_image = Rect.get_ragion(rect, the_image)
         Display.image(rect_image)
 
+    @staticmethod
+    def binary_rect(the_image, rect):
+        Display.rect(numpy_helper.transfer_values_quickly(
+            the_image,{1:255}), rect)
+
 
     @staticmethod
     def rects(the_image, rects, color=(0,255,255)):

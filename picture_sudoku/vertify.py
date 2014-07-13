@@ -252,8 +252,8 @@ def vertify_all_pics():
         show_difference(pic_file_path, actual, difference)
         return True
 
-    # map(handle_one, range(1,15))
-    # handle_one(15, 'png')
+    map(handle_one, range(1,15))
+    handle_one(15, 'png')
     handle_one(16)
 
 

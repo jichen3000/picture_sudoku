@@ -37,7 +37,10 @@ def analyze_from_center(the_ragion):
     return (real_rect[0]+1, real_rect[1]+1, real_rect[2]-2, real_rect[3]-2)
 
 def has_enough_nonzeros(nonzeros, the_shape):
-    return (float(nonzeros[0].size) / (the_shape[0] * the_shape[1]) ) > 0.01
+    # (float(nonzeros[0].size)).pl()
+    # ((the_shape[0] * the_shape[1]) ).pl()
+    # (float(nonzeros[0].size) / (the_shape[0] * the_shape[1]) ).pl()
+    return (float(nonzeros[0].size) / (the_shape[0] * the_shape[1]) ) > 0.012
 
 def cal_smallest_rect(nonzeros):
     y_indexs, x_indexs = nonzeros
@@ -208,44 +211,58 @@ if __name__ == '__main__':
 
     test_image_path = '../../resource/test/'
     image_14_07_path = test_image_path+'sample_14_07.dataset'
-    image_14_07 = Image.read_from_number_file(image_14_07_path)
+    image_14_07 = Image.load_from_txt(image_14_07_path)
     image_14_07_255 = numpy_helper.transfer_values_quickly(image_14_07, {1:255})
 
     with test(analyze_from_center):
         rect_14_07 = analyze_from_center(image_14_07)
         rect_14_07.must_equal((15, 11, 26, 39))
-        # Display.rect(image_14_07_255, rect_14_07)
+        # Display.binary_rect(image_14_07, rect_14_07)
         # Image.save_to_txt(Rect.get_ragion(rect_14_07, image_14_07), 
         #     test_image_path+'sample_14_07_no.dataset')
 
         image_01_03_path = test_image_path+'sample_01_03.dataset'
-        image_01_03 = Image.read_from_number_file(image_01_03_path)
-        image_01_03_255 = numpy_helper.transfer_values_quickly(image_01_03, {1:255})
+        image_01_03 = Image.load_from_txt(image_01_03_path)
         rect_01_03 = analyze_from_center(image_01_03)
         rect_01_03.must_equal((27, 26, 12, 17))
-        # Display.rect(image_01_03_255, rect_01_03)
+        # Display.binary_rect(image_01_03, rect_01_03)
 
         image_02_null_path = test_image_path+'sample_02_null.dataset'
-        image_02_null = Image.read_from_number_file(image_02_null_path)
-        image_02_null_255 = numpy_helper.transfer_values_quickly(image_02_null, {1:255})
+        image_02_null = Image.load_from_txt(image_02_null_path)
         rect_02_null = analyze_from_center(image_02_null)
         rect_02_null.must_equal(None)
-        # Display.image(image_02_null_255)
+        # Display.binary_image(image_02_null)
 
         image_07_01_path = test_image_path+'sample_07_01.dataset'
-        image_07_01 = Image.read_from_number_file(image_07_01_path)
-        image_07_01_255 = numpy_helper.transfer_values_quickly(image_07_01, {1:255})
+        image_07_01 = Image.load_from_txt(image_07_01_path)
         rect_07_01 = analyze_from_center(image_07_01)
         rect_07_01.must_equal(None)
-        # Display.image(image_07_01_255)
+        # Display.binary_image(image_07_01)
 
         image_13_05_path = test_image_path+'sample_13_05.dataset'
-        image_13_05 = Image.read_from_number_file(image_13_05_path)
-        image_13_05_255 = numpy_helper.transfer_values_quickly(image_13_05, {1:255})
+        image_13_05 = Image.load_from_txt(image_13_05_path)
         rect_13_05 = analyze_from_center(image_13_05)
         rect_13_05.must_equal((17, 17, 16, 23))
-        # Display.image(image_13_05_255)
-        # Display.rect(image_13_05_255, rect_13_05)
+        # Display.binary_image(image_13_05)
+        # Display.binary_rect(image_13_05, rect_13_05)
+
+        image_16_null_36_path = test_image_path+'sample_16_null_36.dataset'
+        image_16_null_36 = Image.load_from_txt(image_16_null_36_path)
+        rect_16_null_36 = analyze_from_center(image_16_null_36)
+        rect_16_null_36.must_equal(None)
+
+        image_16_null_37_path = test_image_path+'sample_16_null_37.dataset'
+        image_16_null_37 = Image.load_from_txt(image_16_null_37_path)
+        rect_16_null_37 = analyze_from_center(image_16_null_37)
+        rect_16_null_37.must_equal(None)
+
+        image_16_null_38_path = test_image_path+'sample_16_null_38.dataset'
+        image_16_null_38 = Image.load_from_txt(image_16_null_38_path)
+        rect_16_null_38 = analyze_from_center(image_16_null_38)
+        rect_16_null_38.must_equal(None)
+        # Display.binary_image(image_16_null_38)
+        # Display.binary_rect(image_16_null_38, rect_16_null_38)
+
 
 
     with test(has_enough_nonzeros):
@@ -269,8 +286,8 @@ if __name__ == '__main__':
         # nonzero_dicts.ppl()
         the_rect = enlarge_search_nonzero_rect(nonzero_dicts, first_rect)
         # the_rect.must_equal((19, 12, 27, 38))
-        # Display.rect(image_14_07_255, first_rect)
-        # Display.rect(image_14_07_255, the_rect)
+        # Display.binary_rect(image_14_07, first_rect)
+        # Display.binary_rect(image_14_07, the_rect)
         
         # import timeit
         # timeit.timeit("__main__.enlarge_search_nonzero_rect(__main__.nonzero_dicts, __main__.first_rect)", 
@@ -310,7 +327,7 @@ if __name__ == '__main__':
     with test(center_rect_enlarge_search):
         the_rect = center_rect_enlarge_search(image_14_07)
         the_rect.must_equal((19, 12, 19, 38))
-        # Display.rect(image_14_07_255, the_rect)
+        # Display.binary_rect(image_14_07, the_rect)
 
         # import timeit
         # timeit.timeit("__main__.center_rect_enlarge_search(__main__.image_14_07)", 

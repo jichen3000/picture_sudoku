@@ -62,8 +62,11 @@ def extract_number_ragions(image_path):
 
     cell_ragions = split_cell_ragion(intersections,square_ragion)
     # flag_test()
-    # Display.image(square_ragion)
     # Display.ragions(cell_ragions)
+    # save_dataset(cell_ragions[36], 'sample_16_zero_36.dataset')
+    # save_dataset(cell_ragions[37], 'sample_16_zero_37.dataset')
+    # save_dataset(cell_ragions[38], 'sample_16_zero_38.dataset')
+    # Display.image(square_ragion)
 
     index_and_number_ragions = analyze_cell_ragions(cell_ragions)
 
@@ -71,7 +74,7 @@ def extract_number_ragions(image_path):
     binary_number_ragions = map(lambda x: numpy_helper.transfer_values_quickly(x, {255:1}), number_ragions)
     # Display.ragions([cell_ragions[number_indexs[23]], number_ragions[23]])
     # save_dataset(cell_ragions[number_indexs[5]], 'sample_13_05.dataset')
-    # save_dataset(number_ragions[5], 'sample_13_05_nonzeros.dataset')
+
     # test
     # Display.ragions(cell_ragions)
     # flag_test()
@@ -296,7 +299,7 @@ def split_cell_ragion(intersections, square_ragion):
         threshed_square_ragion = Image.threshold_white_with_mean_percent(the_ragion, 0.7)
         return threshed_square_ragion
     cell_ragions = map(adjust_one, cell_ragions)
-    # 'test'.pl()
+    # flag_test()
     # Display.ragions(cell_ragions)
     return cell_ragions
 
@@ -388,9 +391,9 @@ if __name__ == '__main__':
 
     #     pass
 
-    # with test("extract_number_ragions for showing"):
-        # image_path = '../../resource/example_pics/sample07.dataset.jpg'
-        # number_indexs, number_ragions = extract_number_ragions(image_path)
+    with test("extract_number_ragions for showing"):
+        image_path = '../../resource/example_pics/sample16.dataset.jpg'
+        number_indexs, number_ragions = extract_number_ragions(image_path)
 
 
         # image_path = '../../resource/example_pics/sample15.dataset.png'
@@ -400,7 +403,7 @@ if __name__ == '__main__':
         #     pic_file_path.ppl()
         #     extract_number_ragions(pic_file_path)
 
-    with test(find_vertical_lines):
+    # with test(find_vertical_lines):
         # image_path = '../../resource/example_pics/sample08.dataset.jpg'
         # gray_image = cv2.imread(image_path, 0)
         # find_vertical_lines(gray_image).must_close(
@@ -413,13 +416,7 @@ if __name__ == '__main__':
         #      numpy.array([  4.18500000e+02,  -2.61799415e-02]),
         #      numpy.array([  4.80400000e+02,  -1.04720068e-02]),
         #      numpy.array([  5.43250000e+02,   4.36332310e-03])])
-
-        image_path = '../../resource/test/sample08_square.jpg'
-        gray_image = cv2.imread(image_path, 0)
-        # Display.image(gray_image)
-        vertical_lines = find_vertical_lines(gray_image)
-        # vertical_lines.ppl()
-        Display.polar_lines(gray_image, vertical_lines)
+        
 
 
     # with test(extract_square_from_contour):
