@@ -20,6 +20,9 @@ from picture_sudoku.cv2_helpers.display import Display
 from polar_lines import PolarLines
 import nonzero_rect
 
+import logging
+logger = logging.getLogger(__name__)
+
 # large is brighter, less is darker.
 BLACK = 0
 WHITE = 255
@@ -42,19 +45,24 @@ def extract_number_ragions(image_path):
     gray_image = cv2.imread(image_path, 0)
 
     square_ragion = find_square_ragion(gray_image)
+    # cv2.imwrite('../resource/test/sample08_square.jpg', square_ragion)
 
     vertical_lines = find_sudoku_vertical_lines(square_ragion)
-    if len(vertical_lines) > SUDOKU_SIZE + 1:
-        raise SudokuError("The count of vertical_lines is larger than {0}".format(SUDOKU_SIZE))
-
     horizontal_lines = find_sudoku_horizontal_lines(square_ragion)
-    if len(horizontal_lines) > SUDOKU_SIZE + 1:
-        raise SudokuError("The count of horizontal_lines is larger than {0}".format(SUDOKU_SIZE))
+    # flag_test()
     # Display.polar_lines(square_ragion, vertical_lines+horizontal_lines)
+    # Display.polar_lines(square_ragion, vertical_lines)
+
+    if len(vertical_lines) != SUDOKU_SIZE + 1:
+        raise SudokuError("The count of vertical_lines is not equal as {0}".format(SUDOKU_SIZE+1))
+    if len(horizontal_lines) != SUDOKU_SIZE + 1:
+        raise SudokuError("The count of horizontal_lines is not equal as {0}".format(SUDOKU_SIZE+1))
 
     intersections = find_intersections(vertical_lines, horizontal_lines)
 
     cell_ragions = split_cell_ragion(intersections,square_ragion)
+    # flag_test()
+    # Display.image(square_ragion)
     # Display.ragions(cell_ragions)
 
     index_and_number_ragions = analyze_cell_ragions(cell_ragions)
@@ -66,6 +74,7 @@ def extract_number_ragions(image_path):
     # save_dataset(number_ragions[5], 'sample_13_05_nonzeros.dataset')
     # test
     # Display.ragions(cell_ragions)
+    # flag_test()
     # show_all(square_ragion, index_and_number_ragions)
     # show_all(square_ragion, index_and_number_ragions)
     # number_ragions[0].ppl()
@@ -96,12 +105,13 @@ def find_square_ragion(gray_image):
     # from picture_sudoku.helpers.common import Resource
     # numpy.save(Resource.get_path("for_issues/max_contour.npy"), max_contour)
     # square_contour = convert_to_square(max_contour)
+    # this is using the border line.
     square_contour = extract_square_from_contour(max_contour)
     # square_contour.ppl()
 
     if square_contour == None:
         raise SudokuError("Cannot find sudoku square!")
-    # from picture_sudoku.cv2_helpers.display import Display
+    # flag_test()
     # Display.contours(gray_image, [square_contour])
 
     larged_contour = Quadrilateral.enlarge(square_contour, 0.007)
@@ -139,6 +149,8 @@ def find_sudoku_horizontal_lines(gray_image):
 def find_vertical_lines(gray_image):
     # gray_image = cv2.GaussianBlur(gray_image,ksize=(5,5), sigmaX=0)
     # let the horizen lines dispear
+    # flag_test()
+    # Display.image(gray_image)
     dx_image = cv2.Sobel(gray_image,cv2.CV_16S,2,0)
     # convert from dtype=int16 to dtype=uint8
     dx_image = cv2.convertScaleAbs(dx_image)
@@ -148,29 +160,43 @@ def find_vertical_lines(gray_image):
     cannied_image = cv2.Canny(dx_image, low_threshold, high_threshold)
 
     lines = PolarLines.find_suitable_lines(cannied_image)
-    # show_lines(cannied_image, lines)
+    # Display.polar_lines(cannied_image, lines)
 
-    def to_positive_rho(line):
-        if line[0] < 0:
-            line[0] = abs(line[0])
-            line[1] = line[1] - numpy.pi
-        return line
     # tansfer negative angle to positive
-    lines = map(to_positive_rho, lines)
+    lines = map(PolarLines.adjust_to_positive_rho_line, lines)
+    # lines.ppl()
+    # Display.polar_lines(cannied_image, lines)
+    lines = map(PolarLines.adjust_theta_when_rho_0_and_near_180, lines)
+    # lines.ppl()
+    # Display.polar_lines(cannied_image, lines)
+    # lines = map(to_positive_rho, lines)
+    # flag_test()
+    # Display.polar_lines(cannied_image, lines)
 
     def filter_line(line):
         rho, theta = line
-        theta_degree = (theta * 180/ numpy.pi)
-        return abs(theta_degree) < 10
+        # larger than 170, 10 degree equal 0.174444, 180 degree equal 3.14
+        if theta > 3.14 - 0.174:
+            theta = 3.14 - theta
+        return abs(theta) < 0.174
+        # theta_degree = (theta * 180/ numpy.pi)
+        # # (rho, theta_degree).pl()
+        # # 180 and 0 are same to the line's theta.
+        # if theta_degree > 170:
+        #     theta_degree = 180 - theta_degree
+        # return abs(theta_degree) < 10
     # remove the lines which have large angle
+    # Display.polar_lines(cannied_image, lines)
     lines = filter(filter_line, lines)
-    # show_lines(cannied_image, lines)
+    # flag_test()
+    # Display.polar_lines(cannied_image, lines)
 
     accuracy_pixs = gray_image.shape[1] / SUDOKU_SIZE *0.3 # 9
     catalogued_lines = PolarLines.catalogue_lines(lines, accuracy_pixs)
+    # catalogued_lines.ppl()
     mean_lines = PolarLines.cal_mean_lines(catalogued_lines)
-    # all_lines = PolarLines.fill_lost_lines(mean_lines, SUDOKU_SIZE+1)
-    # show_lines(cannied_image, all_lines)
+    # flag_test()
+    # Display.polar_lines(cannied_image, mean_lines)
 
     return mean_lines
 
@@ -211,17 +237,23 @@ def extract_square_from_contour(contour):
     # lines = PolarLines.find_suitable_lines(the_image)
     square_ragion = the_image
     vertical_lines = find_vertical_lines(square_ragion)
-    border_line_count = 2
-    if len(vertical_lines) > border_line_count:
-        raise SudokuError("The count of vertical border lines is larger than {0}"
-            .format(border_line_count))
 
     horizontal_lines = find_horizontal_lines(square_ragion)
-    if len(horizontal_lines) > border_line_count:
-        raise SudokuError("The count of horizontal border lines is larger than {0}"
-            .format(border_line_count))
+    # flag_test()
     # Display.polar_lines(square_ragion, vertical_lines+horizontal_lines)
-    # Display.polar_lines(square_ragion, horizontal_lines)
+
+    border_line_count = 2
+    if len(vertical_lines) > border_line_count:
+        logger.info("The count of vertical border lines is larger than {0}"
+            .format(border_line_count))
+        vertical_lines = [vertical_lines[0],vertical_lines[-1]]
+    if len(horizontal_lines) > border_line_count:
+        logger.info("The count of horizontal border lines is larger than {0}"
+            .format(border_line_count))
+        horizontal_lines = [horizontal_lines[0],horizontal_lines[-1]]
+
+    # flag_test()
+    # Display.polar_lines(square_ragion, vertical_lines+horizontal_lines)
 
     intersections = find_intersections(vertical_lines, horizontal_lines)
     # intersections.ppl()
@@ -258,10 +290,10 @@ def split_cell_ragion(intersections, square_ragion):
     get_ragion_func = lambda c: Contour.get_rect_ragion(c, threshed_square_ragion)
     cell_ragions = map(get_ragion_func,  cell_contours)
     def adjust_one(the_ragion):
-        # blured_ragion = cv2.GaussianBlur(the_ragion, ksize=(3,3), sigmaX=0)
+        # blured_ragion = cv2.GaussianBlur(the_ragion, ksize=(5,5), sigmaX=0)
         # threshed_square_ragion = cv2.adaptiveThreshold(the_ragion,WHITE,
         #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
-        threshed_square_ragion = Image.threshold_white_with_mean_percent(the_ragion, 0.5)
+        threshed_square_ragion = Image.threshold_white_with_mean_percent(the_ragion, 0.7)
         return threshed_square_ragion
     cell_ragions = map(adjust_one, cell_ragions)
     # 'test'.pl()
@@ -342,18 +374,21 @@ if __name__ == '__main__':
         return Image.save_to_txt(transfered_image,file_path)
 
 
-    with test(extract_number_ragions):
-        image_path = '../../resource/example_pics/sample07.dataset.jpg'
-        # gray_image = cv2.imread(image_path, 0)
-        # Display.image(gray_image)
+    # with test("extract_number_ragions for sample 7"):
+    #     image_path = '../../resource/example_pics/sample07.dataset.jpg'
+    #     # gray_image = cv2.imread(image_path, 0)
+    #     # Display.image(gray_image)
 
-        number_indexs, number_ragions = extract_number_ragions(image_path)
-        number_indexs.must_equal((0, 1, 5, 7, 8, 9, 10, 16, 17, 30, 32, 36, 37, 
-            39, 41, 43, 44, 48, 50, 63, 64, 70, 71, 72, 73, 75, 77, 79, 80))
-        # number_indexs.must_equal((0, 1, 3, 7, 8, 9, 10, 16, 17, 30, 32, 
-        #     36, 37, 39, 41, 43, 44, 48, 50, 63, 64, 70, 71, 72, 73, 75, 77, 79, 80))
-        number_ragions.size().must_equal(29)
+    #     number_indexs, number_ragions = extract_number_ragions(image_path)
+    #     number_indexs.must_equal((0, 1, 5, 7, 8, 9, 10, 16, 17, 30, 32, 36, 37, 
+    #         39, 41, 43, 44, 48, 50, 63, 64, 70, 71, 72, 73, 75, 77, 79, 80))
+    #     # number_indexs.must_equal((0, 1, 3, 7, 8, 9, 10, 16, 17, 30, 32, 
+    #     #     36, 37, 39, 41, 43, 44, 48, 50, 63, 64, 70, 71, 72, 73, 75, 77, 79, 80))
+    #     number_ragions.size().must_equal(29)
 
+    #     pass
+
+    # with test("extract_number_ragions for showing"):
         # image_path = '../../resource/example_pics/sample07.dataset.jpg'
         # number_indexs, number_ragions = extract_number_ragions(image_path)
 
@@ -364,15 +399,36 @@ if __name__ == '__main__':
         #     pic_file_path = '../../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.jpg'
         #     pic_file_path.ppl()
         #     extract_number_ragions(pic_file_path)
-        pass
 
-    with test(extract_square_from_contour):
-        contour = numpy.load("../../resource/test/max_contour_with_noises.npy")
-        extract_square_from_contour(contour).must_close(
-            numpy.array(  [[[ 57, 202]],
-                           [[ 75, 455]],
-                           [[314, 456]],
-                           [[332, 204]]]))
+    with test(find_vertical_lines):
+        # image_path = '../../resource/example_pics/sample08.dataset.jpg'
+        # gray_image = cv2.imread(image_path, 0)
+        # find_vertical_lines(gray_image).must_close(
+        #     [numpy.array([ 45.        ,  -0.12217298]),
+        #      numpy.array([ 104.33333333,   -0.11053752]),
+        #      numpy.array([  1.66333333e+02,  -9.30843274e-02]),
+        #      numpy.array([  2.30000000e+02,  -7.41765221e-02]),
+        #      numpy.array([  2.91000000e+02,  -6.10865672e-02]),
+        #      numpy.array([  3.54000000e+02,  -4.36332544e-02]),
+        #      numpy.array([  4.18500000e+02,  -2.61799415e-02]),
+        #      numpy.array([  4.80400000e+02,  -1.04720068e-02]),
+        #      numpy.array([  5.43250000e+02,   4.36332310e-03])])
+
+        image_path = '../../resource/test/sample08_square.jpg'
+        gray_image = cv2.imread(image_path, 0)
+        # Display.image(gray_image)
+        vertical_lines = find_vertical_lines(gray_image)
+        # vertical_lines.ppl()
+        Display.polar_lines(gray_image, vertical_lines)
+
+
+    # with test(extract_square_from_contour):
+    #     contour = numpy.load("../../resource/test/max_contour_with_noises.npy")
+    #     extract_square_from_contour(contour).must_close(
+    #         numpy.array(  [[[ 57, 202]],
+    #                        [[ 75, 455]],
+    #                        [[314, 456]],
+    #                        [[332, 204]]]))
 
 
 

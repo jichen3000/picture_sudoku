@@ -53,13 +53,14 @@ if __name__ == '__main__':
         return answer_result
 
     with test("/sudoku/image/result"):
-        # for i in range(2,7) + range(8,15):
-        #     answer_result = test_the_sample(i)
-        #     answer_result['status'].must_equal('SUCCESS')
-        #     pic_filepath.p()
-        #     if answer_result['status'] != 'SUCCESS':
-        #         answer_result.pp()
-        test_the_sample(8).pp()
+        for i in range(2,7) + range(8,15):
+            answer_result = test_the_sample(i)
+            answer_result['status'].must_equal('SUCCESS')
+            answer_result['pic_file_name'].p()
+            if answer_result['status'] != 'SUCCESS':
+                answer_result.pp()
+        # test_the_sample(8).pp()
+        # test_the_sample(6).pp()
         
     # with test("/sudoku/image/result"):
     #     pic_filepath = '../resource/example_pics/sample07.dataset.jpg'    

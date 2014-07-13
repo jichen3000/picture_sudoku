@@ -2,6 +2,8 @@ import cv2
 import numpy
 import operator
 
+from picture_sudoku.helpers import list_helper
+
 class PolarLines(object):
     ''' 
         for the lines in Polar coordinate system
@@ -27,21 +29,31 @@ class PolarLines(object):
     @staticmethod
     def catalogue_lines(lines, accuracy_pixs):
         ''' accuracy_pixs is used to be judge the line's class '''
-        sorted_lines = sorted(lines, key=operator.itemgetter(0))
+        return list_helper.catalogue_list_list(lines, 0, accuracy_pixs)
+        # sorted_lines = sorted(lines, key=operator.itemgetter(0))
 
-        pre_rho = sorted_lines[0][0]
-        catalogued_lines = [ [sorted_lines[0]] ]
-        cur_index = 0
-        for cur_line  in sorted_lines[1::]:
-            rho, theta = cur_line
-            if pre_rho + accuracy_pixs > rho:
-                catalogued_lines[cur_index].append(cur_line)
-            else:
-                cur_index += 1
-                catalogued_lines  += [[cur_line]]
-            pre_rho = rho
-        return catalogued_lines
+        # pre_rho = sorted_lines[0][0]
+        # catalogued_lines = [ [sorted_lines[0]] ]
+        # cur_index = 0
+        # for cur_line  in sorted_lines[1::]:
+        #     rho, theta = cur_line
+        #     if pre_rho + accuracy_pixs > rho:
+        #         catalogued_lines[cur_index].append(cur_line)
+        #     else:
+        #         cur_index += 1
+        #         catalogued_lines  += [[cur_line]]
+        #     pre_rho = rho
+        # return catalogued_lines
 
+    # @staticmethod
+    # def remove_minority_by_theta(lines):
+    #     ''' delta equals 20 degree '''
+    #     delta = 0.348
+    #     standard_theta = lines[0][1]
+    #     result_lines = [ [lines[0]] ]
+    #     for cur_line  in lines[1::]:
+    #         rho, theta = line
+    #         # if 
 
     @staticmethod
     def cal_mean_lines(catalogued_lines):
@@ -99,10 +111,44 @@ class PolarLines(object):
 
     @staticmethod
     def cal_degree(line):
-        return (line[1] * 180/ numpy.pi)
+        return PolarLines.cal_degree_from_angle(line[1])
+
+    @staticmethod
+    def cal_angle_from_degree(the_degree):
+        return the_degree * numpy.pi / 180
+
+    @staticmethod
+    def cal_degree_from_angle(the_angle):
+        return (the_angle * 180/ numpy.pi)
+
+    @staticmethod
+    def create_from_rho_and_degree(rho, the_degree):
+        # return (line[1] * 180/ numpy.pi)
+        return numpy.array([ rho, PolarLines.cal_angle_from_degree(the_degree)])
+
+    @staticmethod
+    def adjust_to_positive_rho_line(line):
+        rho, theta = line
+        if rho < 0:
+            rho = abs(rho)
+            theta = theta - numpy.pi
+        return numpy.array([rho, theta])
+
+    @staticmethod
+    def adjust_theta_when_rho_0_and_near_180(line):
+        rho, theta = line
+        # largar than 170 degree
+        if theta > 2.967:
+            theta =  theta - numpy.pi
+            rho = 0 - rho
+        # if rho ==0 and theta > 170 / 180 * numpy.pi:
+        #     theta =  theta - numpy.pi
+            # theta =  numpy.pi - theta
+        return numpy.array([rho, theta])
 
 if __name__ == '__main__':
     from picture_sudoku.cv2_helpers.display import Display
+    from picture_sudoku.cv2_helpers.image import Image
     from minitest import *
     inject(numpy.allclose, 'must_close')
 
@@ -200,4 +246,46 @@ if __name__ == '__main__':
         point = PolarLines.cal_intersection(line1, line2)
         point.must_close((114.25, 78.752235466022668))
 
+    with test(PolarLines.adjust_to_positive_rho_line):
+        the_line = PolarLines.create_from_rho_and_degree(10, 178)
+        PolarLines.adjust_to_positive_rho_line(the_line).must_close(
+            PolarLines.create_from_rho_and_degree(10, 178))
+
+        the_line = PolarLines.create_from_rho_and_degree(-10, 178)
+        PolarLines.adjust_to_positive_rho_line(the_line).must_close(
+            PolarLines.create_from_rho_and_degree(10, -2))
+
+    with test(PolarLines.adjust_theta_when_rho_0_and_near_180):
+        the_line = PolarLines.create_from_rho_and_degree(0, 178)
+        PolarLines.adjust_theta_when_rho_0_and_near_180(the_line).must_close(
+            PolarLines.create_from_rho_and_degree(0, -2))
+        the_line = numpy.array([  340,   0.06] )
+        PolarLines.adjust_theta_when_rho_0_and_near_180(the_line).must_close(
+            the_line)
+
+        # the_image = Image.generate_mask((800,600))
+        # Display.polar_lines(the_image, [the_line])
+
+
+
+    with test("show line degree"):
+        # 2,3,5 same, 1,4 same
+        line1 = PolarLines.create_from_rho_and_degree(10, 178)
+        line2 = PolarLines.create_from_rho_and_degree(10, -2)
+        line3 = PolarLines.create_from_rho_and_degree(-10, -182)
+        line4 = PolarLines.create_from_rho_and_degree(-10, -2)
+        line5 = PolarLines.create_from_rho_and_degree(10, 358)
+        the_image = Image.generate_mask((800,600))
+        # # # Display.polar_lines(the_image, [line2,line3, line4])
+        # Display.polar_lines(the_image, [line1, line2])
+        # Display.polar_lines(the_image, [line2,])
+
+
+        lines = [numpy.array([ 1.        , -0.12217298]),
+                 numpy.array([ 1.        ,  3.01941967]),
+                 numpy.array([ 3.        ,  3.00196624]),
+                 numpy.array([ 5.        ,  3.00196624]),
+                 numpy.array([ 7.        ,  3.00196624])]
+        # Display.polar_lines(the_image, lines[:1])
+        # Display.polar_lines(the_image, lines[:1])
 

@@ -83,7 +83,7 @@ class Display(object):
         Display.same_size_ragions(same_size_ragions, count_in_row, init_value)
 
     @staticmethod
-    def ragions_binary(ragions, count_in_row=9, init_value=BLACK):
+    def binary_ragions(ragions, count_in_row=9, init_value=BLACK):
         '''
             Show the ragions which could have different size.
         '''

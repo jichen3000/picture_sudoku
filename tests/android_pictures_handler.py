@@ -14,8 +14,13 @@ if __name__ == '__main__':
     from picture_sudoku.helpers.common import Resource, OtherResource
     from picture_sudoku.helpers import numpy_helper
 
+    import __builtin__
 
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
 
+    __builtin__.Display = Display
     # with test("for issue 6 to 8"):
     #     pic_file_path = 'for_issues/colin_demo.jpg'
     #     # pic_file_path = 'for_issues/cannot_recognize.jpg'
@@ -81,10 +86,23 @@ if __name__ == '__main__':
 
     #     pass
 
-    with test("for issue Unrecognized or unsupported array type in function cvGetMat"):
-        image_path = Resource.get_path('for_issues/colin_demo.jpg')
+    # with test("for issue Unrecognized or unsupported array type in function cvGetMat"):
+    #     image_path = Resource.get_path('for_issues/colin_demo.jpg')
+    #     # image_path = Resource.get_path('for_issues/cannot_recognize_02.jpg')
+    #     main_sudoku.answer_quiz_with_pic(image_path).pl()
+    #     # gray_image = cv2.imread(image_path, 0)
+    #     # Display.image(gray_image)
+    #     # /Users/colin/work/picture_sudoku/other_resource/font_training_result
+
+    with test("for having more than two border lines"):
+        '''
+            when I use , it will report two border lines.
+            5,6,8,11
+        '''
+        # image_path = Resource.get_path('example_pics/sample11.dataset.jpg')
+        # image_path = Resource.get_path('example_pics/sample08.dataset.jpg')
+        image_path = Resource.get_path('example_pics/sample16.dataset.jpg')
         # image_path = Resource.get_path('for_issues/cannot_recognize_02.jpg')
         main_sudoku.answer_quiz_with_pic(image_path).pl()
         # gray_image = cv2.imread(image_path, 0)
         # Display.image(gray_image)
-        # /Users/colin/work/picture_sudoku/other_resource/font_training_result
