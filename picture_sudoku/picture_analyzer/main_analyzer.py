@@ -31,9 +31,12 @@ SUDOKU_SIZE = 9
 
 __all__ = ['extract_number_ragions', 'extract_specified_number_ragion']
 
-def extract_specified_number_ragion(image_path, x, y):
+def extract_specified_number_ragion(image_path, x, y = None):
     number_indexs, number_ragions = extract_number_ragions(image_path)
-    specified_number_index = (y * SUDOKU_SIZE + x)
+    if y:
+        specified_number_index = (y * SUDOKU_SIZE + x)
+    else:
+        specified_number_index = x
     return number_ragions[number_indexs.index(specified_number_index)]
 
 def extract_number_ragions(image_path):
@@ -63,9 +66,8 @@ def extract_number_ragions(image_path):
     cell_ragions = split_cell_ragion(intersections,square_ragion)
     # flag_test()
     # Display.ragions(cell_ragions)
-    # save_dataset(cell_ragions[36], 'sample_16_zero_36.dataset')
-    # save_dataset(cell_ragions[37], 'sample_16_zero_37.dataset')
-    # save_dataset(cell_ragions[38], 'sample_16_zero_38.dataset')
+    # save_dataset(cell_ragions[30], 'sample_17_06_30_original.dataset')
+    # save_dataset(cell_ragions[80], 'sample_16_08_80_original.dataset')
     # Display.image(square_ragion)
 
     index_and_number_ragions = analyze_cell_ragions(cell_ragions)
@@ -73,7 +75,7 @@ def extract_number_ragions(image_path):
     number_indexs, number_ragions = zip(*index_and_number_ragions)
     binary_number_ragions = map(lambda x: numpy_helper.transfer_values_quickly(x, {255:1}), number_ragions)
     # Display.ragions([cell_ragions[number_indexs[23]], number_ragions[23]])
-    # save_dataset(cell_ragions[number_indexs[5]], 'sample_13_05.dataset')
+    # save_dataset(number_ragions[20], 'sample_16_08_80_original.dataset')
 
     # test
     # Display.ragions(cell_ragions)
@@ -394,6 +396,11 @@ if __name__ == '__main__':
     with test("extract_number_ragions for showing"):
         image_path = '../../resource/example_pics/sample16.dataset.jpg'
         number_indexs, number_ragions = extract_number_ragions(image_path)
+        # the_special_ragion = extract_specified_number_ragion(image_path, 30)
+        # save_dataset(the_special_ragion, 'sample_17_06_30.dataset')
+
+        # the_special_ragion = extract_specified_number_ragion(image_path, 52)
+        # save_dataset(the_special_ragion, 'sample_17_06_52.dataset')
 
 
         # image_path = '../../resource/example_pics/sample15.dataset.png'

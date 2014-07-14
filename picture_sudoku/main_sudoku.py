@@ -31,36 +31,36 @@ RESULT_ANSWERED = "answered"
 ERROR_CANNOT_ANSWER = "Sorry, cannot answer it, since this puzzle may not follow the rules of Sudoku!"
 
 
-def show_pic_with_digits(image_path, number_indexs, digits):
-    pass
-
-def show_answer_result(answer_result):
-    pass    
 
 def get_digits(image_path, som_svm, with_ragions=False):
     number_indexs, number_ragions = main_analyzer.extract_number_ragions(image_path)
     # number_indexs.pl()
     # from picture_sudoku.cv2_helpers.display import Display
-    # issue_ragion = number_ragions[number_indexs.index(30)]
+    # issue_ragion = number_ragions[number_indexs.index(20)]
     # # Display.binary_image(issue_ragion)
     # Image.save_to_txt(issue_ragion,Resource.get_path('test/binary_image_6_8_03.dataset'))
     # show_number_ragions(number_ragions)
     # som_svm.dag_classify(transfer_to_digit_matrix(adjust_number_ragion(issue_ragion))).pl()
     # Image.save_to_txt(adjust_number_ragion(issue_ragion), 
-    #     Resource.get_path('for_issues/binary_image_6_8_dd.dataset'))
+    #     Resource.get_path('test/sample_16_08_30_ori.dataset'))
     # Display.binary_ragions(number_ragions)
+
+    # it will adjust number ragion
     # adjusted_number_ragions = map(adjust_number_ragion, number_ragions)
     # number_matrixs = map(transfer_to_digit_matrix, adjusted_number_ragions)
     # it remove the adjusted_number_ragions
     number_matrixs = map(transfer_to_digit_matrix, number_ragions)
     digits = map(som_svm.dag_classify, number_matrixs)
-    number_indexs.pl()
-    digits.pl()
+
+    digits = map(Ragion.review_classified_number_ragion_for_8, number_ragions, digits)
+    # number_indexs.pl()
+    # digits.pl()
     digits = tuple(digits)
     if with_ragions:
         return number_indexs, digits, number_ragions
     else:
         return number_indexs, digits
+
 
 def adjust_number_ragion(the_image):
     element_value = 1
@@ -75,14 +75,16 @@ def transfer_to_digit_matrix(the_ragion):
     '''
         (1, FULL_SIZE) matrix
     '''
-    heighted_ragion = Image.resize_keeping_ratio_by_height(the_ragion, IMG_SIZE)
-    standard_ragion = Ragion.fill(heighted_ragion,(IMG_SIZE,IMG_SIZE))
+    # heighted_ragion = Image.resize_keeping_ratio_by_height(the_ragion, IMG_SIZE)
+    # standard_ragion = Ragion.fill(heighted_ragion,(IMG_SIZE,IMG_SIZE))
+    standard_ragion = resize_to_cell_size(the_ragion)
     return numpy.matrix(standard_ragion.reshape(1, FULL_SIZE))
 
 def resize_to_cell_size(the_ragion):
     heighted_ragion = Image.resize_keeping_ratio_by_height(the_ragion, IMG_SIZE)
     standard_ragion = Ragion.fill(heighted_ragion,(IMG_SIZE,IMG_SIZE))
     return standard_ragion
+
 
 # def answer_quiz_with_pic(pic_file_path):
 #     try:

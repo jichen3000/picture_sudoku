@@ -41,6 +41,34 @@ class Ragion(object):
             cur_ragion = numpy.concatenate((left_mat, cur_ragion, right_mat), axis=1)
         return cur_ragion
 
+    @staticmethod
+    def review_classified_number_ragion_for_8(the_ragion, the_digit):
+        '''
+            change the digit which has been recognized as 8,
+            but actually is the other ones, like 6. 
+        '''
+        if the_digit != 8 :
+            return the_digit
+        height, width = the_ragion.shape
+        def review_for_6():
+            # for 6, check the top right part
+            # is there a line which is all 0
+            end_y = height / 2
+            start_y = height / 4
+            start_x = width / 2
+            end_x = width
+            
+            for y_index in range(end_y+1, start_y, -1):
+                whole_half_line_is_0 = True
+                for x_index in range(start_x, end_x):
+                    if(the_ragion[y_index, x_index] > 0):
+                        whole_half_line_is_0 = False
+                        break
+                if whole_half_line_is_0:
+                    return 6
+            return 8
+        return review_for_6()
+
 class Ragions(object):
     @staticmethod
     def join(ragions, count_in_row=9, init_value=BLACK):
@@ -90,8 +118,11 @@ class Ragions(object):
         return pic_array
 
 
+
 if __name__ == '__main__':
     from minitest import *
+    from picture_sudoku.cv2_helpers.image import Image
+    from picture_sudoku.cv2_helpers.display import Display
 
     inject(numpy.allclose, 'must_close')
 
@@ -104,6 +135,20 @@ if __name__ == '__main__':
                            [ 0.,  1.,  1.,  1.,  1.,  0.],
                            [ 0.,  0.,  0.,  0.,  0.,  0.],
                            [ 0.,  0.,  0.,  0.,  0.,  0.]]))
+
+    with test(Ragion.review_classified_number_ragion_for_8):
+        the_pic_path = '../../resource/test/pic17_no08_real6_cal8.dataset'
+        the_ragion = Image.load_from_txt(the_pic_path)
+        Ragion.review_classified_number_ragion_for_8(the_ragion, 8).must_equal(6)
+
+
+        the_pic_path = '../../resource/test/pic16_no05_real8_cal6.dataset'
+        the_ragion = Image.load_from_txt(the_pic_path)
+        Ragion.review_classified_number_ragion_for_8(the_ragion, 8).must_equal(8)
+        # Display.binary_image(the_ragion)
+        # save file: ../resource/svm_wrong_digits/pic16_no10_real8_cal6.dataset
+        # save file: ../resource/svm_wrong_digits/pic16_no20_real8_cal6.dataset
+        pass
 
     with test("Ragions.fill_to_same_size"):
         ragions = (numpy.ones((3,2)), numpy.ones((2,1)), numpy.ones((2,4)))
