@@ -57,9 +57,11 @@ def extract_number_ragions(image_path):
     # Display.polar_lines(square_ragion, vertical_lines)
 
     if len(vertical_lines) != SUDOKU_SIZE + 1:
-        raise SudokuError("The count of vertical_lines is not equal as {0}".format(SUDOKU_SIZE+1))
+        raise SudokuError("The count of vertical_lines is not"+
+            " equal as {0}".format(SUDOKU_SIZE+1))
     if len(horizontal_lines) != SUDOKU_SIZE + 1:
-        raise SudokuError("The count of horizontal_lines is not equal as {0}".format(SUDOKU_SIZE+1))
+        raise SudokuError("The count of horizontal_lines is not"+
+            " equal as {0}".format(SUDOKU_SIZE+1))
 
     intersections = find_intersections(vertical_lines, horizontal_lines)
 
@@ -73,7 +75,7 @@ def extract_number_ragions(image_path):
     index_and_number_ragions = analyze_cell_ragions(cell_ragions)
 
     number_indexs, number_ragions = zip(*index_and_number_ragions)
-    binary_number_ragions = map(lambda x: numpy_helper.transfer_values_quickly(x, {255:1}), number_ragions)
+    binary_number_ragions = map(numpy_helper.transfer_255to1, number_ragions)
     # Display.ragions([cell_ragions[number_indexs[23]], number_ragions[23]])
     # save_dataset(number_ragions[20], 'sample_16_08_80_original.dataset')
 
@@ -318,7 +320,8 @@ def analyze_cell_ragions(cell_ragions):
     return filter(lambda x: x, all_cell_ragions)
 
 
-def find_max_contour(threshed_image, filter_func = None, accuracy_percent_with_perimeter=0.0001):
+def find_max_contour(threshed_image, filter_func = None, 
+        accuracy_percent_with_perimeter=0.0001):
     contours = Image.find_contours(
         threshed_image, filter_func, accuracy_percent_with_perimeter)
     # from picture_sudoku.cv2_helpers.display import Display

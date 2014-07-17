@@ -9,8 +9,6 @@ import numpy
 from picture_sudoku.helpers import json_helper
 from rbf_smo import Smo
 
-IMG_SIZE = 32
-
 
 
 def most_common(lst):
@@ -180,112 +178,26 @@ class MultipleSvm(object):
         this.save_variables(data_path)
         return this
 
-
-''' split line '''
-''' for digit recongnition'''
-
-def filter_filenames_with_nums(pathname,start_with_numbers):
-    num_strs = map(str, start_with_numbers)
-    # num_str = str(start_with_number)
-    return [filename for filename in os.listdir(pathname) 
-        for num_str in num_strs if filename.startswith(num_str)]
-
-def save_list(file_path, the_list):
-    with open(file_path, 'w') as the_file:
-        for item in the_list:
-            the_file.write("%s\n" % item)
-
-def load_data_from_images_with_nums(the_path, start_with_numbers):
-    file_names = filter_filenames_with_nums(the_path, start_with_numbers)
-    data_matrix = numpy.mat(get_dataset_from_filenames(the_path, 
-            file_names))
-    label_matrix = numpy.mat(get_labels_from_filenames( 
-            file_names)).transpose()
-    return data_matrix, label_matrix
-
-
-def binary_number_to_lists(file_path):
-    with open(file_path) as data_file:
-        result = [int(line[index]) for line in data_file 
-            for index in range(IMG_SIZE)]
-    return result
-
-def binary_number_to_intn_lists(file_path, split_number=16):
-    with open(file_path) as data_file:
-        result = [int(line[index*split_number:(index+1)*split_number],2) 
-            for line in data_file for index in range(IMG_SIZE/split_number)]
-    return result
-
-def get_dataset_from_filenames(path_name, file_names, 
-    binary_func=binary_number_to_lists):
-    return [binary_func(os.path.join(path_name,file_name))
-        for file_name in file_names]
-
-def get_label_from_filename(filename):
-    return int(filename.split('_')[0])
-
-def get_labels_from_filenames(file_names):
-    return map(get_label_from_filename, file_names)
-
-
-
-def get_dataset_matrix_hash(the_path, start_with_numbers):
-    return {i:numpy.mat(get_dataset_from_filenames(the_path, 
-        filter_filenames_with_nums(the_path,(i,)))) for i in start_with_numbers}
-
-
-
 if __name__ == '__main__':
     from minitest import *
-
-    font_result_path = '../../other_resource/font_training_result'
-    hand_result_path = '../../other_resource/hand_training_result'
-
-    # font_training_path = '../../../codes/python/projects/font_number_binary/number_images'
-    font_training_path = '../../other_resource/font_training'
-
-    # hand_training_path = '../../../codes/python/ml/k_nearest_neighbours/training_digits'
-    # hand_testing_path = '../../../codes/python/ml/k_nearest_neighbours/test_digits'
-    hand_training_path = '../../other_resource/hand_training'
-    hand_testing_path = '../../other_resource/hand_testing'
+    import data_file_helper
 
     def show_number_matrix(number_matrix):
         from picture_sudoku.helpers import numpy_helper
         from picture_sudoku.cv2_helpers.display import Display
         from picture_sudoku.cv2_helpers.image import Image
-        binary_number_image = number_matrix.reshape((IMG_SIZE, IMG_SIZE))
+        binary_number_image = number_matrix.reshape((data_file_helper.IMG_SIZE, data_file_helper.IMG_SIZE))
         number_image = numpy_helper.transfer_values_quickly(binary_number_image, {1:255})
         number_image = numpy.array(number_image, dtype=numpy.uint8)
         # Image.save_to_txt(number_image,'test1.dataset')
         Display.image(number_image)
 
-    def test_multi():
-        arg_exp = 20
 
-        # dataset_matrix_hash = get_dataset_matrix_hash(training_pic_path, range(2))
-        # dataset_matrix_hash = get_dataset_matrix_hash(font_training_path, range(1,10))
-        # dataset_matrix_hash = get_dataset_matrix_hash(font_training_path, [0,1])
-        # dataset_matrix_hash = get_dataset_matrix_hash(hand_training_path, range(10))
-        # dataset_matrix_hash = get_dataset_matrix_hash(training_pic_path, (9,))
-        # dataset_matrix_hash.pp()
+    ''' how to use training, please see the generator.py'''
 
-        # mb = MultipleSvm.train_and_save_variables(Smo, dataset_matrix_hash, 200, 0.0001, 1000, arg_exp, font_result_path)
-        # mb = MultipleSvm.load_variables(Smo, 'font_dataset')
-        # mb = MultipleSvm.load_variables(Smo, hand_result_path)
-
-        # dataset_matrix_hash[9][0].shape.ppl()
-        # mb.dag_classify(dataset_matrix_hash[9][0]).ppl()
-        # show_number_matrix(dataset_matrix_hash[9][0])
-        # mb.normal_classify(dataset_matrix_hash[9][0]).pp()
-
-        # data_matrix,label_matrix = load_data_from_images_with_nums(hand_testing_path, range(10))
-        # mb.test(data_matrix,label_matrix).pp()
-        # training_digits
-        # {'error_count': 38, 'error_ratio %': 4.02, 'row_count': 946}
-        pass
-
-
-
-    with test("test_multi"):
-        test_multi()
-        pass
+    with test(MultipleSvm.dag_classify):
+        dataset_matrix_hash = data_file_helper.get_dataset_matrix_hash(
+            data_file_helper.FONT_TRAINING_PATH, (9,))
+        mb = MultipleSvm.load_variables(Smo, 
+            data_file_helper.FONT_RESULT_PATH)
+        mb.dag_classify(dataset_matrix_hash[9][0]).must_equal(9)

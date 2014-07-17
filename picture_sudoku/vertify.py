@@ -14,12 +14,14 @@ from picture_sudoku.cv2_helpers.ragion import Ragions
 
 from picture_sudoku.picture_analyzer import main_analyzer
 from picture_sudoku.digit_recognition.multiple_svm import MultipleSvm
-from picture_sudoku.digit_recognition import multiple_svm
+from picture_sudoku.digit_recognition import data_file_helper
 from picture_sudoku.digit_recognition.rbf_smo import Smo
 from picture_sudoku.helpers import numpy_helper
 from picture_sudoku.helpers import list_helper
 
 from picture_sudoku import main_sudoku
+
+import logging
 
 SUDOKU_SIZE = main_analyzer.SUDOKU_SIZE
 
@@ -205,10 +207,10 @@ def show_difference(pic_file_path, actual, difference):
         Display.images([all_number_ragion, the_image])
 
 
-FONT_RESULT_PATH = '../other_resource/font_training_result'
+RESULT_PATH = data_file_helper.SUPPLEMENT_RESULT_PATH
 
 def digit_recognize():
-    mb = MultipleSvm.load_variables(Smo, FONT_RESULT_PATH)
+    mb = MultipleSvm.load_variables(Smo, RESULT_PATH)
 
     # file_path = '../resource/svm_wrong_digits/pic04_no17_real8_cal3.dataset'
     file_path = '../resource/svm_wrong_digits/pic04_no33_real8_cal3.dataset'
@@ -246,7 +248,7 @@ def vertify_all_pics():
     pic_data = gen_pic_test_data()
 
     # hand_result_path = '../resource/digit_recognition/hand_dataset'
-    smo_svm = MultipleSvm.load_variables(Smo, FONT_RESULT_PATH)
+    smo_svm = MultipleSvm.load_variables(Smo, RESULT_PATH)
 
     def handle_one(i, extend_name='jpg'):
         pic_file_path = '../resource/example_pics/sample'+str(i).zfill(2)+'.dataset.'+extend_name
@@ -255,10 +257,11 @@ def vertify_all_pics():
         show_difference(pic_file_path, actual, difference)
         return True
 
+    # handle_one(1)
     map(handle_one, range(1,15))
     handle_one(15, 'png')
-    # handle_one(16)
-    # handle_one(17)
+    handle_one(16)
+    handle_one(17)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,25 @@
+{
+    "arg_exp": 20,
+    "b": 0.12843557458255583,
+    "last_test_info": {
+        "error_count": 0,
+        "error_ratio %": 0.0,
+        "row_count": 114,
+        "svm_count": 30,
+        "transfer_hash": {
+            "5": 1,
+            "9": -1
+        }
+    },
+    "svm_count": 30,
+    "transfer_hash": [
+        [
+            9,
+            -1
+        ],
+        [
+            5,
+            1
+        ]
+    ]
+}

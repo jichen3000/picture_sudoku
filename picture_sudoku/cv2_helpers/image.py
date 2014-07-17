@@ -31,15 +31,16 @@ class Image(object):
 
 
     @staticmethod
-    def resize_keeping_ratio_by_height(the_image, height=700):
+    def resize_keeping_ratio_by_height(the_image, height=700, interpolation = cv2.INTER_AREA):
         width = float(height) / the_image.shape[0]
         dim = (int(the_image.shape[1] * width), height)
+        return cv2.resize(the_image, dim, interpolation = interpolation)
         # pic17_no13_real6_cal5
         # return cv2.resize(the_image, dim, interpolation = cv2.INTER_AREA)
         # in sample 16, the 8 will be recognized as 6
         # return cv2.resize(the_image, dim, interpolation = cv2.INTER_LINEAR)
         # INTER_CUBIC is good, but too slow
-        return cv2.resize(the_image, dim, interpolation = cv2.INTER_CUBIC)
+        # return cv2.resize(the_image, dim, interpolation = cv2.INTER_CUBIC)
 
     @staticmethod
     def cal_nonzero_rect_keeping_ratio(the_image):
