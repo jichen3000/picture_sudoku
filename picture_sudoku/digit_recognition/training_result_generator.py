@@ -119,10 +119,10 @@ if __name__ == '__main__':
     def generate_supplement_number_ragion():
         file_paths=['../../resource/svm_wrong_digits/pic01_no00_real5_cal6.dataset',
                     '../../resource/svm_wrong_digits/pic01_no10_real8_cal6.dataset']
-        # file_path = '../../resource/svm_wrong_digits/pic16_no19_real5_cal1.dataset'
-        # file_path = '../../resource/svm_wrong_digits/pic17_no13_real6_cal5.dataset'
-        # file_path = '../../resource/svm_wrong_digits/pic16_no20_real8_cal6.dataset'
-        # file_path = '../../resource/test/pic17_no08_real6_cal8.dataset'
+        # file_path = '../../resource/svm_wrong_digits/pic15_no19_real5_cal1.dataset'
+        # file_path = '../../resource/svm_wrong_digits/pic16_no13_real6_cal5.dataset'
+        # file_path = '../../resource/svm_wrong_digits/pic15_no20_real8_cal6.dataset'
+        # file_path = '../../resource/test/pic16_no08_real6_cal8.dataset'
         for file_path in file_paths:
             the_digit = extract_real_digit(file_path)
             generate_standard_supplement_number_ragions(file_path, the_digit,

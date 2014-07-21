@@ -68,7 +68,7 @@ def extract_number_ragions(image_path):
     cell_ragions = split_cell_ragion(intersections,square_ragion)
     # flag_test()
     # Display.ragions(cell_ragions)
-    # save_dataset(cell_ragions[30], 'sample_17_06_30_original.dataset')
+    save_dataset(cell_ragions[72], 'sample_15_05_72.dataset')
     # save_dataset(cell_ragions[80], 'sample_16_08_80_original.dataset')
     # Display.image(square_ragion)
 
@@ -370,16 +370,21 @@ def show_all(square_ragion, index_and_number_ragions):
     Display.ragions([square_ragion, all_number_ragion])
 
 
+def save_dataset(gray_image, file_name):
+    from picture_sudoku.helpers.common import Resource
+    file_path = Resource.get_path('test',file_name)
+    # file_path = '../../resource/test/' + file_name
+    transfered_image = numpy_helper.transfer_values_quickly(gray_image,{255:1})
+    print(file_path+" has been saved!")
+    return Image.save_to_txt(transfered_image,file_path)
+
+
 if __name__ == '__main__':
     from minitest import *
     from picture_sudoku.cv2_helpers.display import Display
 
     inject(numpy.allclose, 'must_close')
 
-    def save_dataset(gray_image, file_name):
-        file_path = '../../resource/test/' + file_name
-        transfered_image = numpy_helper.transfer_values_quickly(gray_image,{255:1})
-        return Image.save_to_txt(transfered_image,file_path)
 
 
     # with test("extract_number_ragions for sample 7"):

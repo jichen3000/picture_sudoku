@@ -35,12 +35,22 @@ class Image(object):
         width = float(height) / the_image.shape[0]
         dim = (int(the_image.shape[1] * width), height)
         return cv2.resize(the_image, dim, interpolation = interpolation)
-        # pic17_no13_real6_cal5
-        # return cv2.resize(the_image, dim, interpolation = cv2.INTER_AREA)
-        # in sample 16, the 8 will be recognized as 6
-        # return cv2.resize(the_image, dim, interpolation = cv2.INTER_LINEAR)
-        # INTER_CUBIC is good, but too slow
-        # return cv2.resize(the_image, dim, interpolation = cv2.INTER_CUBIC)
+
+    @staticmethod
+    def resize_keeping_ratio_by_fixed_length(the_image, fixed_length=32, interpolation = cv2.INTER_AREA):
+        ''' (16,18),(16,14),(30,35), (38,36)
+        '''
+        height, width = the_image.shape
+        if height > width:
+            sized_height = fixed_length
+            ratio = float(fixed_length) / height
+            sized_width = int(width * ratio)
+        else:
+            sized_width = fixed_length
+            ratio = float(fixed_length) / width
+            sized_height = int(height * ratio)
+        return cv2.resize(the_image, (sized_width, sized_height),
+                interpolation = interpolation)
 
     @staticmethod
     def cal_nonzero_rect_keeping_ratio(the_image):
@@ -226,5 +236,22 @@ if __name__ == '__main__':
                [[384, 569]]], dtype=numpy.int32)
         Image.fill_contours(mask, [contour])
 
+    with test(Image.resize_keeping_ratio_by_fixed_length):
+        the_shape = (16,18)
+        mask = Image.generate_mask(the_shape)
+        Image.resize_keeping_ratio_by_fixed_length(mask).shape.must_equal((28, 32))
+
+        the_shape = (16,14)
+        mask = Image.generate_mask(the_shape)
+        Image.resize_keeping_ratio_by_fixed_length(mask).shape.must_equal((32, 28))
+
+        the_shape = (30,35)
+        mask = Image.generate_mask(the_shape)
+        Image.resize_keeping_ratio_by_fixed_length(mask).shape.must_equal((27, 32))
+
+        the_shape = (38,36)
+        mask = Image.generate_mask(the_shape)
+        Image.resize_keeping_ratio_by_fixed_length(mask).shape.must_equal((32, 30))
+        
 
 

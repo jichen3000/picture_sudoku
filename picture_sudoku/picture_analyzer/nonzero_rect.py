@@ -18,9 +18,8 @@ __all__ = ['analyze_from_center']
 def analyze_from_center(the_ragion):
     first_rect = generate_first_rect(the_ragion)
     nonzeros = the_ragion.nonzero()
-
     nonzeros_in_rect = filter_nonzero_in_rect(nonzeros, first_rect)
-    if not has_enough_nonzeros(nonzeros_in_rect, the_ragion.shape):
+    if not has_enough_nonzeros(nonzeros_in_rect, first_rect):
         return None
 
     nonzero_dicts = organize_nonzeros(nonzeros)
@@ -36,11 +35,15 @@ def analyze_from_center(the_ragion):
     # return real_rect
     return (real_rect[0]+1, real_rect[1]+1, real_rect[2]-2, real_rect[3]-2)
 
-def has_enough_nonzeros(nonzeros, the_shape):
+def has_enough_nonzeros_by_shape(nonzeros, the_shape):
     # (float(nonzeros[0].size)).pl()
     # ((the_shape[0] * the_shape[1]) ).pl()
     # (float(nonzeros[0].size) / (the_shape[0] * the_shape[1]) ).pl()
     return (float(nonzeros[0].size) / (the_shape[0] * the_shape[1]) ) > 0.012
+
+def has_enough_nonzeros(nonzeros, the_rect):
+    x, y, width, height = the_rect
+    return (float(nonzeros[0].size) / (width * height) ) > 0.067
 
 def cal_smallest_rect(nonzeros):
     y_indexs, x_indexs = nonzeros
@@ -93,8 +96,8 @@ def generate_first_rect(the_ragion):
     ragion_height, ragion_width = the_ragion.shape
 
     centroid = Image.centroid(the_ragion)
-    single_width = int(round(ragion_width*0.18))
-    single_height = int(round(ragion_height*0.18))
+    single_width = int(round(ragion_width*0.16))
+    single_height = int(round(ragion_height*0.16))
     # (single_width, single_height).ppl()
     return Rect.cal_center_rect(centroid, single_width, single_width, single_height, single_height)
 
@@ -263,7 +266,24 @@ if __name__ == '__main__':
         # Display.binary_image(image_16_null_38)
         # Display.binary_rect(image_16_null_38, rect_16_null_38)
 
+        image_17_05_00_path = test_image_path+'sample_17_05_00.dataset'
+        image_17_05_00 = Image.load_from_txt(image_17_05_00_path)
+        rect_17_05_00 = analyze_from_center(image_17_05_00)
+        rect_17_05_00.must_equal((16, 17, 12, 18))
+        # Display.binary_rect(image_17_05_00, rect_17_05_00)
 
+        image_08_02_26_path = test_image_path+'sample_08_02_26.dataset'
+        image_08_02_26 = Image.load_from_txt(image_08_02_26_path)
+        rect_08_02_26 = analyze_from_center(image_08_02_26)
+        rect_08_02_26.must_equal((21, 18, 16, 28))
+        # Display.binary_rect(image_08_02_26, rect_08_02_26)
+        # Display.binary_rect(image_08_02_26, (21, 18, 16, 28))
+
+
+    with test(generate_first_rect):
+        first_rect = generate_first_rect(image_17_05_00)
+        first_rect.must_equal((16, 11, 13, 15))
+    #     Display.binary_rect(image_17_05_00, first_rect)
 
     with test(has_enough_nonzeros):
         first_rect = generate_first_rect(image_14_07)
@@ -271,8 +291,22 @@ if __name__ == '__main__':
 
         nonzeros = image_14_07.nonzero()
         nonzeros_in_rect = filter_nonzero_in_rect(nonzeros, first_rect)
-        has_enough_nonzeros(nonzeros_in_rect, image_14_07.shape).must_true()
+        has_enough_nonzeros(nonzeros_in_rect, first_rect).must_true()
 
+        image_15_null_01_path = test_image_path+'sample_15_null_01.dataset'
+        image_15_null_01 = Image.load_from_txt(image_15_null_01_path)
+        first_rect = generate_first_rect(image_15_null_01)
+        nonzeros = image_15_null_01.nonzero()
+        nonzeros_in_rect = filter_nonzero_in_rect(nonzeros, first_rect)
+        has_enough_nonzeros(nonzeros_in_rect, first_rect).must_false()
+
+        image_15_05_72_path = test_image_path+'sample_15_05_72.dataset'
+        image_15_05_72 = Image.load_from_txt(image_15_05_72_path)
+        first_rect = generate_first_rect(image_15_05_72)
+        nonzeros = image_15_05_72.nonzero()
+        nonzeros_in_rect = filter_nonzero_in_rect(nonzeros, first_rect)
+        # (float(nonzeros_in_rect[0].size) / (first_rect[2] * first_rect[3]) ).ppl()
+        has_enough_nonzeros(nonzeros_in_rect, first_rect).must_true()
 
     with test(enlarge_rect):
         non_left, non_top, non_right, non_bottom = True, False, False, True

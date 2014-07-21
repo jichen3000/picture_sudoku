@@ -38,10 +38,9 @@ ERROR_CANNOT_ANSWER = "Sorry, cannot answer it, since this puzzle may not follow
 
 def get_digits(image_path, som_svm, with_ragions=False):
     number_indexs, number_ragions = main_analyzer.extract_number_ragions(image_path)
+    # Display.binary_image(number_ragions[1])
     # number_indexs.pl()
-    # from picture_sudoku.cv2_helpers.display import Display
     # issue_ragion = number_ragions[number_indexs.index(20)]
-    # # Display.binary_image(issue_ragion)
     # Image.save_to_txt(issue_ragion,Resource.get_path('test/binary_image_6_8_03.dataset'))
     # show_number_ragions(number_ragions)
     # som_svm.dag_classify(transfer_to_digit_matrix(adjust_number_ragion(issue_ragion))).pl()
@@ -83,12 +82,19 @@ def transfer_to_digit_matrix(the_ragion):
     # heighted_ragion = Image.resize_keeping_ratio_by_height(the_ragion, IMG_SIZE)
     # standard_ragion = Ragion.fill(heighted_ragion,(IMG_SIZE,IMG_SIZE))
     # INTER_CUBIC INTER_AREA INTER_LINEAR
+    # the_ragion.shape.p()
     standard_ragion = resize_to_cell_size(the_ragion, interpolation = cv2.INTER_AREA)
+    # flag_test()
+    # Display.binary_image(standard_ragion)
+    # standard_ragion.shape.p()
     return numpy.matrix(standard_ragion.reshape(1, FULL_SIZE))
 
 def resize_to_cell_size(the_ragion, interpolation):
-    heighted_ragion = Image.resize_keeping_ratio_by_height(the_ragion, IMG_SIZE, interpolation)
+    # the_ragion.shape.pl()
+    heighted_ragion = Image.resize_keeping_ratio_by_fixed_length(the_ragion, IMG_SIZE, interpolation)
+    # heighted_ragion.shape.pl()
     standard_ragion = Ragion.fill(heighted_ragion,(IMG_SIZE,IMG_SIZE))
+    # standard_ragion.shape.pl()
     return standard_ragion
 
 

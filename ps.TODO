@@ -9,8 +9,11 @@
  ☐ issue 10001: when generating 1,0, the error reate will up over 50%. in rbf_smo, multiple_svm, generator.
  ☐ cosider another way which could trasfer a number ragion to meaningful matrix in svm_smo.
  ☐ using genetic algorithm to generate the number ragion, then point which number it is.
+ ☐ issue 10004: ValueError: total size of new array must be unchanged
 
- 
+ now, I understand a little about Machine Learning, that the point is not the initial dataset, but the system how to recognize the wrong result and put it into the dataset, and then train again. When you finish this feedback system, you will see the true power of ML.
+
+ Then how about genetic algorithm, I suppose if I add the human feedback into it pulsing the ML, it will generate the least sign of AI. The idea 1, is let  genetic algorithm generate the dataset automatically, then machine can know the border of dataset, finally it can extract the rule from dataset.
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿

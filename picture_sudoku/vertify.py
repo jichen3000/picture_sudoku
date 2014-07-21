@@ -83,6 +83,12 @@ def gen_pic_test_data():
                 {'indexs':(0, 8, 10, 12, 16, 20, 24, 28, 30, 32, 40, 48, 50, 52, 56, 60, 64, 68, 70, 72, 80),
                  'digits':(9, 5, 4, 7, 3, 8, 1, 3, 6, 7, 8, 3, 9, 6, 1, 9, 2, 6, 4, 5, 8)},
                 17: 
+                {'indexs':(0, 3, 5, 6, 10, 16, 22, 26, 27, 30, 33, 35, 36, 38, 42, 51, 54, 57, 58, 64, 70, 72, 78),
+                 'digits':(5, 9, 4, 1, 7, 4, 5, 2, 3, 6, 2, 9, 8, 6, 7, 5, 7, 8, 1, 3, 2, 6, 3)},
+                18: 
+                {'indexs':(0, 8, 10, 12, 16, 20, 24, 28, 30, 32, 40, 48, 50, 52, 56, 60, 64, 68, 70, 72, 80),
+                 'digits':(9, 5, 4, 7, 3, 8, 1, 3, 6, 7, 8, 3, 9, 6, 1, 9, 2, 6, 4, 5, 8)},
+                90: 
                 {'indexs':(0, 8, 10, 12, 16, 20, 24, 28, 30, 32, 40, 48, 50, 52, 56, 60, 64, 68, 70, 72, 80),
                  'digits':(9, 5, 4, 7, 3, 8, 1, 3, 6, 7, 8, 3, 9, 6, 1, 9, 2, 6, 4, 5, 8)}
             }
@@ -257,15 +263,18 @@ def vertify_all_pics():
         show_difference(pic_file_path, actual, difference)
         return True
 
-    # handle_one(1)
-    map(handle_one, range(1,15))
-    handle_one(15, 'png')
-    handle_one(16)
-    handle_one(17)
+    # handle_one(1) 8 ,15
+    map(handle_one, range(1,18))
+    handle_one(90, 'png')
+
+    # handle_one(17)
+    # handle_one(15)
 
 
 if __name__ == '__main__':
     from minitest import *
+    import __builtin__
+    __builtin__.Display = Display
     '''
         README: 
             Using digit_recognize, you can vertify a single number image with svm.
