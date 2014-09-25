@@ -12,7 +12,7 @@ It will get the sudoku puzzle from the pic.
 4. run the test in training_result_generator.py 
 5. run the test in vertify.py
 
-
+http://picturesudoku.herokuapp.com/
 
 set
 PYTHONPATH=/Users/colin/work/picture_sudoku

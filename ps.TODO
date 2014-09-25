@@ -9,7 +9,7 @@
  ☐ issue 10001: when generating 1,0, the error reate will up over 50%. in rbf_smo, multiple_svm, generator.
  ☐ cosider another way which could trasfer a number ragion to meaningful matrix in svm_smo.
  ☐ using genetic algorithm to generate the number ragion, then point which number it is.
- ☐ issue 10004: ValueError: total size of new array must be unchanged
+ ☐ issue 10005: some part of number lost.
 
  now, I understand a little about Machine Learning, that the point is not the initial dataset, but the system how to recognize the wrong result and put it into the dataset, and then train again. When you finish this feedback system, you will see the true power of ML.
 
@@ -18,6 +18,7 @@
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ issue 10004: ValueError: total size of new array must be unchanged @done (14-07-21 12:12)
  ✔ feature 101: support add wrong number ragion to svm, both in training and testing. And this will also sout out the issue 10003, now if there are some digits which are recognized wrong, just add it to training dataset. @done (14-07-18 05:54)
  ✔ issue 10003: recognize wrongly for two 6, one is 8, another is 5, in sample17.dataset.jpg, #30 and #52. The changed: 1. using interpolation = cv2.INTER_CUBIC in resize_keeping_ratio_by_height in image.py. 2. add a method review_classified_number_ragion_for_8 in process in main_sudoku.py. @done (14-07-14 17:50)
  ✔ issue 10002: it will take some null ragion in sample16.dataset.jpg. Fixed, by raise the rate from 0.01 to 0.012 in has_enough_nonzeros method in nonzero_rect.py @done (14-07-13 14:29)

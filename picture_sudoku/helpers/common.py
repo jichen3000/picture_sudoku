@@ -7,17 +7,17 @@ import os
 class Resource(object):
     resource_relative_path = '../../resource'
     @classmethod
-    def get_path(cls, file_path=None, *others):
+    def get_path(cls, *others):
         cur_path = os.path.dirname(__file__)
         resource_path = os.path.join(cur_path, cls.resource_relative_path)
-        if not file_path:
-            result = os.path.abspath(resource_path)
-        else:
-            result =  os.path.abspath(
-                os.path.join(resource_path, file_path))
+        result = os.path.abspath(resource_path)
         if others:
             result = os.path.join(result, *others)
         return result
+
+    @classmethod
+    def get_test_path(cls, *others):
+        return cls.get_path('test', *others)
 
 class OtherResource(Resource):
     resource_relative_path = '../../other_resource'
@@ -36,6 +36,10 @@ if __name__ == '__main__':
         sample_01_path = Resource.get_path('example_pics','sample01.dataset.jpg')
         os.path.exists(sample_01_path).must_true()
 
+
+    with test(Resource.get_test_path):
+        Resource.get_test_path('123.jpg').must_equal(
+            Resource.get_path('test', '123.jpg'))
 
     with test(OtherResource.get_path):
         other_resource_path = OtherResource.get_path()

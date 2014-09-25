@@ -89,7 +89,7 @@ def transfer_to_digit_matrix(the_ragion):
     # standard_ragion.shape.p()
     return numpy.matrix(standard_ragion.reshape(1, FULL_SIZE))
 
-def resize_to_cell_size(the_ragion, interpolation):
+def resize_to_cell_size(the_ragion, interpolation = cv2.INTER_AREA):
     # the_ragion.shape.pl()
     heighted_ragion = Image.resize_keeping_ratio_by_fixed_length(the_ragion, IMG_SIZE, interpolation)
     # heighted_ragion.shape.pl()

@@ -181,11 +181,14 @@ class MultipleSvm(object):
 if __name__ == '__main__':
     from minitest import *
     import data_file_helper
+    from picture_sudoku.helpers import numpy_helper
+    from picture_sudoku.cv2_helpers.display import Display
+    from picture_sudoku.cv2_helpers.image import Image
+    from picture_sudoku.helpers.common import Resource
+    from picture_sudoku import main_sudoku
+
 
     def show_number_matrix(number_matrix):
-        from picture_sudoku.helpers import numpy_helper
-        from picture_sudoku.cv2_helpers.display import Display
-        from picture_sudoku.cv2_helpers.image import Image
         binary_number_image = number_matrix.reshape((data_file_helper.IMG_SIZE, data_file_helper.IMG_SIZE))
         number_image = numpy_helper.transfer_values_quickly(binary_number_image, {1:255})
         number_image = numpy.array(number_image, dtype=numpy.uint8)
@@ -201,3 +204,12 @@ if __name__ == '__main__':
         mb = MultipleSvm.load_variables(Smo, 
             data_file_helper.FONT_RESULT_PATH)
         mb.dag_classify(dataset_matrix_hash[9][0]).must_equal(9)
+
+    with test("special number"):
+        file_name = 'sample_18_01_26_resized.dataset'
+        issue_ragion = Image.load_from_txt(Resource.get_path('test',file_name))
+        transfered_ragion = main_sudoku.transfer_to_digit_matrix(issue_ragion)
+        mb = MultipleSvm.load_variables(Smo, 
+            data_file_helper.FONT_RESULT_PATH)
+        mb.dag_classify(transfered_ragion).must_equal(1)
+        # Display.binary_image(main_sudoku.resize_to_cell_size(issue_ragion))

@@ -209,6 +209,7 @@ if __name__ == '__main__':
     from minitest import *
     from picture_sudoku.cv2_helpers.display import Display
     from picture_sudoku.helpers import numpy_helper
+    from picture_sudoku.helpers.common import Resource
 
     inject(numpy.allclose, 'must_close')
 
@@ -278,7 +279,8 @@ if __name__ == '__main__':
         rect_08_02_26.must_equal((21, 18, 16, 28))
         # Display.binary_rect(image_08_02_26, rect_08_02_26)
         # Display.binary_rect(image_08_02_26, (21, 18, 16, 28))
-
+        # the_ragion = Rect.get_ragion(rect_08_02_26, image_08_02_26)
+        # Image.save_to_txt(the_ragion, image_08_02_26_path+".tmp")
 
     with test(generate_first_rect):
         first_rect = generate_first_rect(image_17_05_00)

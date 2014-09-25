@@ -48,7 +48,8 @@ def extract_number_ragions(image_path):
     gray_image = cv2.imread(image_path, 0)
 
     square_ragion = find_square_ragion(gray_image)
-    # cv2.imwrite('../resource/test/sample08_square.jpg', square_ragion)
+    # Display.image(square_ragion)
+    # cv2.imwrite('../../resource/test/sample_15_square.jpg', square_ragion)
 
     vertical_lines = find_sudoku_vertical_lines(square_ragion)
     horizontal_lines = find_sudoku_horizontal_lines(square_ragion)
@@ -68,8 +69,7 @@ def extract_number_ragions(image_path):
     cell_ragions = split_cell_ragion(intersections,square_ragion)
     # flag_test()
     # Display.ragions(cell_ragions)
-    save_dataset(cell_ragions[72], 'sample_15_05_72.dataset')
-    # save_dataset(cell_ragions[80], 'sample_16_08_80_original.dataset')
+    # save_dataset(cell_ragions[5], 'sample_19_07_05_original.dataset')
     # Display.image(square_ragion)
 
     index_and_number_ragions = analyze_cell_ragions(cell_ragions)
@@ -95,10 +95,11 @@ def find_square_ragion(gray_image):
     # but cannot using ksize=(5,5), since some picture will get wrong number value.
     blured_image = cv2.GaussianBlur(gray_image, ksize=(3,3), sigmaX=0)
 
+    # Display.image(blured_image)
     threshed_image = cv2.adaptiveThreshold(blured_image,WHITE,
         cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
 
-    # from picture_sudoku.cv2_helpers.display import Display
+    # flag_test()
     # Display.image(threshed_image)
 
     ''' 
@@ -123,7 +124,6 @@ def find_square_ragion(gray_image):
 
     larged_contour = Quadrilateral.enlarge(square_contour, 0.007)
     larged_contour = Contour.check_beyond_borders(larged_contour, gray_image.shape)
-    # from picture_sudoku.cv2_helpers.display import Display
     # Display.contours(gray_image, [larged_contour])
     # larged_contour.ppl()
 
@@ -296,12 +296,21 @@ def split_cell_ragion(intersections, square_ragion):
     # Display.image(threshed_square_ragion)
     get_ragion_func = lambda c: Contour.get_rect_ragion(c, threshed_square_ragion)
     cell_ragions = map(get_ragion_func,  cell_contours)
+    # from picture_sudoku.helpers.common import Resource
+    # cv2.imwrite(Resource.get_path('test', 'sample_15_null_38_image.jpg'), cell_ragions[38])
+
     def adjust_one(the_ragion):
-        # blured_ragion = cv2.GaussianBlur(the_ragion, ksize=(5,5), sigmaX=0)
-        # threshed_square_ragion = cv2.adaptiveThreshold(the_ragion,WHITE,
-        #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=7, C=2)
-        threshed_square_ragion = Image.threshold_white_with_mean_percent(the_ragion, 0.7)
-        return threshed_square_ragion
+        # the_ragion = cv2.GaussianBlur(the_ragion, ksize=(5,5), sigmaX=0)
+        # blockSize = the_ragion.shape[1]/2
+        # if blockSize % 2 == 0:
+        #     blockSize += 1
+        # thresholded_ragion = cv2.adaptiveThreshold(the_ragion,WHITE,
+        #     cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV, blockSize=blockSize, C=2)
+        # thresholded_ragion = Image.threshold_white_with_mean_percent(the_ragion, 0.70)
+        threshold_value = Ragion.cal_threshold_value(the_ragion, square_ragion, 0.70)
+        thresholded_ragion = Image.threshold_white(the_ragion, threshold_value)
+
+        return thresholded_ragion
     cell_ragions = map(adjust_one, cell_ragions)
     # flag_test()
     # Display.ragions(cell_ragions)
@@ -402,7 +411,7 @@ if __name__ == '__main__':
     #     pass
 
     with test("extract_number_ragions for showing"):
-        image_path = '../../resource/example_pics/sample16.dataset.jpg'
+        image_path = '../../resource/example_pics/sample15.dataset.jpg'
         number_indexs, number_ragions = extract_number_ragions(image_path)
         # the_special_ragion = extract_specified_number_ragion(image_path, 30)
         # save_dataset(the_special_ragion, 'sample_17_06_30.dataset')

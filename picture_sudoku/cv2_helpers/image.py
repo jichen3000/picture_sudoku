@@ -141,6 +141,13 @@ class Image(object):
     @staticmethod
     def threshold_white_with_mean_percent(gray_image, mean_percent=0.7):
         threshold_value = int(gray_image.mean()*mean_percent)
+        # gray_image.mean().ppl()
+        # threshold_value.ppl()
+        not_use, threshed_image = cv2.threshold(gray_image,threshold_value,WHITE,cv2.THRESH_BINARY_INV)
+        return threshed_image
+
+    @staticmethod
+    def threshold_white(gray_image, threshold_value):
         not_use, threshed_image = cv2.threshold(gray_image,threshold_value,WHITE,cv2.THRESH_BINARY_INV)
         return threshed_image
 
@@ -153,6 +160,8 @@ if __name__ == '__main__':
 
     from display import Display
     from picture_sudoku.helpers import numpy_helper
+    from picture_sudoku.helpers.common import Resource
+    from ragion import Ragion
 
     inject(numpy.allclose, 'must_close')
 
@@ -252,6 +261,4 @@ if __name__ == '__main__':
         the_shape = (38,36)
         mask = Image.generate_mask(the_shape)
         Image.resize_keeping_ratio_by_fixed_length(mask).shape.must_equal((32, 30))
-        
-
 

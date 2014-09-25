@@ -69,6 +69,22 @@ class Ragion(object):
             return 8
         return review_for_6()
 
+    @staticmethod
+    def cal_threshold_value(the_ragion, the_image, mean_percent):
+        ragion_mean = the_ragion.mean()
+        image_mean = the_image.mean()
+        # if ragion_mean > image_mean:
+        #     threshold_value = ragion_mean * (mean_percent + 0.05)
+        # else:
+        #     threshold_value = ragion_mean * (mean_percent - 0.05)
+        # threshold_value = ragion_mean * mean_percent - (ragion_mean - image_mean)
+        (ragion_mean, image_mean).pl()
+        threshold_value = ragion_mean * mean_percent
+        # (ragion_mean * mean_percent).pl()
+        # (threshold_value).pl()
+        return threshold_value
+
+
 class Ragions(object):
     @staticmethod
     def join(ragions, count_in_row=9, init_value=BLACK):
